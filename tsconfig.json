@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es6", // Or a higher target like es2020 if you're using a newer Node.js version
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
+}

@@ -1,0 +1,15 @@
+# JetBrains IDEs
+.idea/
+
+# Dependency directories
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+
+# Environment variables
+.env
+
