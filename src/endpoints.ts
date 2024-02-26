@@ -1,6 +1,7 @@
 export interface Route {
     path: string;
     method: string;
+    visibility: string;
 }
 
 export interface Endpoint {
@@ -50,11 +51,12 @@ function parseEndpoints() {
 
 function parseRoutes(endpoints: { [key: string]: Endpoint }) {
     Object.keys(process.env).forEach((key) => {
-        const routeMatch = key.match(/^CODEFLY_RESTROUTE__(.+)__(.+)___REST____(.+)$/);
+        const routeMatch = key.match(/^CODEFLY_RESTROUTE__(.+)__(.+)___REST____(.+)_____(.*)$/);
         if (routeMatch) {
-            const [, appName, serviceName, rest] = routeMatch;
+            const [, appName, serviceName, rest, method] = routeMatch;
             const addressKey = `${appName.toUpperCase()}_${serviceName.toUpperCase()}`;
 
+            console.log(appName, serviceName, rest, method, addressKey, endpoints[addressKey]);
             // Ensure the endpoint exists before adding routes to it
             if (!endpoints[addressKey]) {
                 console.warn(`Endpoint for ${appName}/${serviceName} not found when processing route: ${key}`);
@@ -62,12 +64,16 @@ function parseRoutes(endpoints: { [key: string]: Endpoint }) {
             }
 
             // The method is the value of the environment variable
-            const method = process.env[key];
+            const visibility = process.env[key]  ?? '';
+            if (visibility === '') {
+                console.warn(`Visibility for route ${key} is not set`);
+                return;
+            }
             // Transform 'rest' into a path by replacing '__' with '/'
             const path = `/${rest.replace(/__/g, '/')}`.toLowerCase();
 
             if (method) {
-                endpoints[addressKey].routes.push({ path, method });
+                endpoints[addressKey].routes.push({ path, method, visibility });
             } else {
                 console.warn(`No method specified for route ${key}`);
             }

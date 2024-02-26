@@ -20,7 +20,7 @@ describe('codefly', () => {
     it('should return the correct address for a given route', () => {
         // Mock environment variables
         process.env.CODEFLY_ENDPOINT__PUBLIC__API___REST = 'http://localhost:3000';
-        process.env.CODEFLY_RESTROUTE__PUBLIC__API___REST____BACKEND__SERVER__VERSION = 'GET';
+        process.env.CODEFLY_RESTROUTE__PUBLIC__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
 
         // Dynamically import codefly to ensure it uses the updated process.env
         const { codefly } = require('./codefly');
