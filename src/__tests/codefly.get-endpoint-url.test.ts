@@ -1,8 +1,4 @@
-import { parseEnvVariables } from './endpoints';
-
-
-// Your test file
-describe('codefly', () => {
+describe('codefly getEndpointUrl', () => {
     // Save the original process.env
     const originalEnv = process.env;
 
@@ -19,14 +15,14 @@ describe('codefly', () => {
 
     it('should return the correct address for a given route', () => {
         // Mock environment variables
-        process.env.CODEFLY_ENDPOINT__PUBLIC__API___REST = 'http://localhost:3000';
-        process.env.CODEFLY_RESTROUTE__PUBLIC__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
+        process.env.CODEFLY_ENDPOINT__BACKEND__API___REST = 'http://localhost:3000';
+        process.env.CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
 
         // Dynamically import codefly to ensure it uses the updated process.env
-        const { codefly } = require('./codefly');
+        const { getEndpointUrl } = require('../codefly');
 
-        const result = codefly({
-            service: "public/api",
+        const result = getEndpointUrl({
+            service: "backend/api",
             method: "GET",
             path: "/backend/server/version"
         });

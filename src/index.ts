@@ -1,1 +1,2 @@
-export { codefly } from './codefly';
+export { getEndpointUrl, getServiceUrl, hasMatchingEndpoint } from './codefly';
+export { getEndpoints } from './endpoints'
