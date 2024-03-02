@@ -18,15 +18,11 @@ describe('codefly getEndpointUrl', () => {
         process.env.CODEFLY_ENDPOINT__BACKEND__API___REST = 'http://localhost:3000';
         process.env.CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
 
-        // Dynamically import codefly to ensure it uses the updated process.env
-        const { getEndpointUrl } = require('../codefly');
+        // Dynamically import codefly internal to ensure it uses the updated process.env
+        const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl({
-            service: "backend/api",
-            method: "GET",
-            path: "/backend/server/version"
-        });
-
+        const result = getEndpointUrl("GET", "backend/api", "/backend/server/version");
+            
         expect(result).toEqual('http://localhost:3000');
     });
 });

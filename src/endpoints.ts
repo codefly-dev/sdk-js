@@ -86,6 +86,47 @@ function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
 }
 
 
+export function getEndpointsMap() {
+    const map = {};
+    const endpoints: { [key: string]: ServiceEndpoint } = {};
+
+    Object.keys(process.env).forEach((key) => {
+        const endpointMatch = key.match(/^CODEFLY_ENDPOINT__(.+)__(.+)___REST$/);
+
+        if (endpointMatch) {
+            const [, applicationName, serviceName] = endpointMatch;
+            const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
+            const service = `${applicationName}/${serviceName}`.toLowerCase();
+
+            // Initialize addresses as an array of strings
+            let addresses: string[] = [];
+
+            // Attempt to parse the environment variable value as JSON 
+            // if it's a string that looks like a JSON array
+            // eg: ["localhost:3005", "localhost:5006"]
+            const rawAddresses = process.env[key];
+            if (rawAddresses && rawAddresses.startsWith('[') && rawAddresses.endsWith(']')) {
+                try {
+                    const parsedAddresses = JSON.parse(rawAddresses);
+                    // Ensure parsedAddresses is actually an array of strings
+                    if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'string')) {
+                        addresses = parsedAddresses;
+                    } else {
+                        console.warn(`Parsed addresses for ${key} are not a string array.`);
+                    }
+                } catch (e) {
+                    console.error(`Error parsing JSON for ${key}:`, e);
+                }
+            } else if (rawAddresses) {
+                // If it's a simple string (not JSON), just use it directly
+                addresses = [rawAddresses];
+            }
+
+            endpoints[addressKey] = { service: service, addresses, routes: [], applicationName, serviceName };
+        }
+    });
+}
+
 export function getEndpoints(): ServiceEndpoint[] {
     const endpoints = parseEndpointsFromEnv();
     parseRoutes(endpoints);
