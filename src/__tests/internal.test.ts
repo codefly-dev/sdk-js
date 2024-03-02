@@ -23,7 +23,47 @@ describe('codefly getEndpointUrl', () => {
 
         const result = getEndpointUrl("GET", "backend/api", "/backend/server/version");
             
-        expect(result).toEqual('http://localhost:3000');
+        expect(result).toEqual('http://localhost:3000/backend/server/version');
+    });
+
+    it('should return null if the method is not available', () => {
+        // Mock environment variables
+        process.env.CODEFLY_ENDPOINT__BACKEND__API___REST = 'http://localhost:3000';
+        process.env.CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
+
+        // Dynamically import codefly internal to ensure it uses the updated process.env
+        const { getEndpointUrl } = require('../internal');
+
+        const result = getEndpointUrl("POST", "backend/api", "/backend/server/version");
+            
+        expect(result).toEqual(null);
+    });
+
+
+    it('should return null if the route is not available', () => {
+        // Mock environment variables
+        process.env.CODEFLY_ENDPOINT__BACKEND__API___REST = 'http://localhost:3000';
+        process.env.CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
+
+        // Dynamically import codefly internal to ensure it uses the updated process.env
+        const { getEndpointUrl } = require('../internal');
+
+        const result = getEndpointUrl("GET", "backend/api", "/backend/server/unavailable");
+            
+        expect(result).toEqual(null);
+    });
+
+    it('should return null if the service is not available', () => {
+        // Mock environment variables
+        process.env.CODEFLY_ENDPOINT__BACKEND__API___REST = 'http://localhost:3000';
+        process.env.CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____GET = 'public';
+
+        // Dynamically import codefly internal to ensure it uses the updated process.env
+        const { getEndpointUrl } = require('../internal');
+
+        const result = getEndpointUrl("GET", "anavilable", "/backend/server/version");
+            
+        expect(result).toEqual(null);
     });
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "codefly",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Get the power of codefly in your JS apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,7 +8,8 @@
     "test": "jest",
     "build-ts": "tsc",
     "prepack": "npm run build-ts",
-    "prepublish" : "npm run build-ts"
+    "prepublish" : "npm run build-ts",
+    "publish": "npm publish"
   },
   "repository": {
     "type": "git",
