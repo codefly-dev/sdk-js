@@ -4,26 +4,31 @@ export interface Route {
     visibility: string;
 }
 
-export interface Endpoint {
+export interface ServiceEndpoint {
     service: string;
+    applicationName?: string;
+    serviceName?: string;
     addresses: string[];
     routes: Route[];
 }
 
-function parseEndpoints() {
-    const endpoints: { [key: string]: Endpoint } = {};
+function parseEndpointsFromEnv() {
+    const endpoints: { [key: string]: ServiceEndpoint } = {};
 
     Object.keys(process.env).forEach((key) => {
         const endpointMatch = key.match(/^CODEFLY_ENDPOINT__(.+)__(.+)___REST$/);
+
         if (endpointMatch) {
-            const [, appName, serviceName] = endpointMatch;
-            const addressKey = `${appName.toUpperCase()}_${serviceName.toUpperCase()}`;
-            const service = `${appName}/${serviceName}`.toLowerCase();
+            const [, applicationName, serviceName] = endpointMatch;
+            const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
+            const service = `${applicationName}/${serviceName}`.toLowerCase();
 
             // Initialize addresses as an array of strings
             let addresses: string[] = [];
 
-            // Attempt to parse the environment variable value as JSON if it's a string that looks like a JSON array
+            // Attempt to parse the environment variable value as JSON 
+            // if it's a string that looks like a JSON array
+            // eg: ["localhost:3005", "localhost:5006"]
             const rawAddresses = process.env[key];
             if (rawAddresses && rawAddresses.startsWith('[') && rawAddresses.endsWith(']')) {
                 try {
@@ -42,24 +47,23 @@ function parseEndpoints() {
                 addresses = [rawAddresses];
             }
 
-            endpoints[addressKey] = { service: service, addresses, routes: [] };
+            endpoints[addressKey] = { service: service, addresses, routes: [], applicationName, serviceName };
         }
     });
 
     return endpoints;
 }
 
-function parseRoutes(endpoints: { [key: string]: Endpoint }) {
+function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
         const routeMatch = key.match(/^CODEFLY_RESTROUTE__(.+)__(.+)___REST____(.+)_____(.*)$/);
         if (routeMatch) {
-            const [, appName, serviceName, rest, method] = routeMatch;
-            const addressKey = `${appName.toUpperCase()}_${serviceName.toUpperCase()}`;
+            const [, applicationName, serviceName, rest, method] = routeMatch;
+            const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
 
-            console.log(appName, serviceName, rest, method, addressKey, endpoints[addressKey]);
             // Ensure the endpoint exists before adding routes to it
             if (!endpoints[addressKey]) {
-                console.warn(`Endpoint for ${appName}/${serviceName} not found when processing route: ${key}`);
+                console.warn(`ServiceEndpoint for ${applicationName}/${serviceName} not found when processing route: ${key}`);
                 return;
             }
 
@@ -82,8 +86,49 @@ function parseRoutes(endpoints: { [key: string]: Endpoint }) {
 }
 
 
-export function parseEnvVariables(): Endpoint[] {
-    const endpoints = parseEndpoints();
+export function getEndpointsMap() {
+    const map = {};
+    const endpoints: { [key: string]: ServiceEndpoint } = {};
+
+    Object.keys(process.env).forEach((key) => {
+        const endpointMatch = key.match(/^CODEFLY_ENDPOINT__(.+)__(.+)___REST$/);
+
+        if (endpointMatch) {
+            const [, applicationName, serviceName] = endpointMatch;
+            const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
+            const service = `${applicationName}/${serviceName}`.toLowerCase();
+
+            // Initialize addresses as an array of strings
+            let addresses: string[] = [];
+
+            // Attempt to parse the environment variable value as JSON 
+            // if it's a string that looks like a JSON array
+            // eg: ["localhost:3005", "localhost:5006"]
+            const rawAddresses = process.env[key];
+            if (rawAddresses && rawAddresses.startsWith('[') && rawAddresses.endsWith(']')) {
+                try {
+                    const parsedAddresses = JSON.parse(rawAddresses);
+                    // Ensure parsedAddresses is actually an array of strings
+                    if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'string')) {
+                        addresses = parsedAddresses;
+                    } else {
+                        console.warn(`Parsed addresses for ${key} are not a string array.`);
+                    }
+                } catch (e) {
+                    console.error(`Error parsing JSON for ${key}:`, e);
+                }
+            } else if (rawAddresses) {
+                // If it's a simple string (not JSON), just use it directly
+                addresses = [rawAddresses];
+            }
+
+            endpoints[addressKey] = { service: service, addresses, routes: [], applicationName, serviceName };
+        }
+    });
+}
+
+export function getEndpoints(): ServiceEndpoint[] {
+    const endpoints = parseEndpointsFromEnv();
     parseRoutes(endpoints);
     return Object.values(endpoints);
 }
