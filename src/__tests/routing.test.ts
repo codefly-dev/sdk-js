@@ -1,9 +1,11 @@
 import { routing } from '../routing';
-import { httpMethods } from "../types";
 
 import * as codefly from '../internal';
+import { Method } from '../types';
 
 describe('routing', () => {
+    const httpMethods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"];
+    
     it("should have all HTTP methods", () => {
         // Check if each HTTP method is defined in httpFunctions
         httpMethods.forEach(method => {
@@ -22,9 +24,6 @@ describe('routing', () => {
 
             spy.mockRestore();
         });
-
-        // Restore mock
-        // spy.mockRestore();
     });
 });
 
