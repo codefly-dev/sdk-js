@@ -1,16 +1,11 @@
 
 // Assuming `endpoints` is a global or accessible variable populated from environment variables:
 import { ServiceEndpoint, getEndpoints } from "./endpoints";
-
-export interface GetEnpointURLParams {
-    service: string;
-    method: string;
-    path: string;
-}
+import { Method } from "./types";
 
 var endpoints: ServiceEndpoint[] = getEndpoints();
 
-export function getEndpointUrl(method: string, service: string, path: string): string | null {
+export function getEndpointUrl(method: Method, service: string, path: string): string | null {
 
     // Find the matching endpoint
     const matchingEndpoint = endpoints.find(ep => ep.service === service);

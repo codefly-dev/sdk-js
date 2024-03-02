@@ -1,4 +1,6 @@
-import { httpMethods, routing } from '../routing';
+import { routing } from '../routing';
+import { httpMethods } from "../types";
+
 import * as codefly from '../internal';
 
 describe('routing', () => {
