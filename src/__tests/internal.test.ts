@@ -26,3 +26,4 @@ describe('codefly getEndpointUrl', () => {
         expect(result).toEqual('http://localhost:3000');
     });
 });
+
