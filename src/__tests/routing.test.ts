@@ -20,7 +20,29 @@ describe('routing', () => {
             const spy = jest.spyOn(codefly, "getEndpointUrl");
             
             routing[method]("test-service", "/route/to");
-            expect(spy).toHaveBeenCalledWith(method, "test-service", "/route/to");
+            expect(spy).toHaveBeenCalledWith(method, "test-service", "/route/to", undefined);
+
+            spy.mockRestore();
+        });
+    });
+
+    it("should call getEndpointUrl with correct params with endpoints", () => {      
+        // Call each function with a path and check if common function is called
+        httpMethods.forEach(method => {
+            const spy = jest.spyOn(codefly, "getEndpointUrl");
+
+            const endpoints = [
+                {
+                    service: 'counter-go-grpc-nextjs-postgres/api',
+                    addresses: [],
+                    routes: [],
+                    applicationName: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
+                    serviceName: 'API'
+                  }
+            ]
+            
+            routing[method]("test-service", "/route/to", endpoints);
+            expect(spy).toHaveBeenCalledWith(method, "test-service", "/route/to", endpoints);
 
             spy.mockRestore();
         });
