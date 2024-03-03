@@ -9,7 +9,3 @@ export const routing: { [key in Method]: (service: string, path: string, endpoin
 httpMethods.forEach(method => {
     routing[method] = (service: string, path: string, endpoints?: ServiceEndpoint[]) => getEndpointUrl(method, service, path, endpoints)
 });
-
-routing.GET = (service: string, path: string, endpoints?: ServiceEndpoint[]) => {
-    return "saman kumara"
-}
