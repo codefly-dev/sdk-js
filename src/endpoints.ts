@@ -8,7 +8,7 @@ export interface ServiceEndpoint {
     service: string;
     applicationName?: string;
     serviceName?: string;
-    addresses: string[];
+    address: string;
     routes: Route[];
 }
 
@@ -22,32 +22,14 @@ function parseEndpointsFromEnv() {
             const [, applicationName, serviceName] = endpointMatch;
             const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
             const service = `${applicationName}/${serviceName}`.toLowerCase();
-
-            // Initialize addresses as an array of strings
-            let addresses: string[] = [];
-
-            // Attempt to parse the environment variable value as JSON 
-            // if it's a string that looks like a JSON array
-            // eg: ["localhost:3005", "localhost:5006"]
-            const rawAddresses = process.env[key];
-            if (rawAddresses && rawAddresses.startsWith('[') && rawAddresses.endsWith(']')) {
-                try {
-                    const parsedAddresses = JSON.parse(rawAddresses);
-                    // Ensure parsedAddresses is actually an array of strings
-                    if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'string')) {
-                        addresses = parsedAddresses;
-                    } else {
-                        console.warn(`Parsed addresses for ${key} are not a string array.`);
-                    }
-                } catch (e) {
-                    console.error(`Error parsing JSON for ${key}:`, e);
-                }
-            } else if (rawAddresses) {
-                // If it's a simple string (not JSON), just use it directly
-                addresses = [rawAddresses];
+            const rawAddress = process.env[key];
+            if (rawAddress) {
+                // Do base64 decoding
+                const address = Buffer.from(rawAddress, 'base64').toString('utf-8');
+                endpoints[addressKey] = { service: service, address, routes: [], applicationName, serviceName };
+            } else {
+                console.warn(`Environment variable ${key} is not set`);
             }
-
-            endpoints[addressKey] = { service: service, addresses, routes: [], applicationName, serviceName };
         }
     });
 
@@ -56,9 +38,9 @@ function parseEndpointsFromEnv() {
 
 function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
-        const routeMatch = key.match(/^CODEFLY_RESTROUTE__(.+)__(.+)___REST____(.+)_____(.*)$/);
+        const routeMatch = key.match(/^CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
         if (routeMatch) {
-            const [, applicationName, serviceName, rest, method] = routeMatch;
+            const [, applicationName, serviceName, endpointName, rest, method] = routeMatch;
             const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
 
             // Ensure the endpoint exists before adding routes to it
@@ -91,38 +73,21 @@ export function getEndpointsMap() {
     const endpoints: { [key: string]: ServiceEndpoint } = {};
 
     Object.keys(process.env).forEach((key) => {
-        const endpointMatch = key.match(/^CODEFLY_ENDPOINT__(.+)__(.+)___REST$/);
+        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
 
         if (endpointMatch) {
-            const [, applicationName, serviceName] = endpointMatch;
+            const [, applicationName, serviceName, endpointName] = endpointMatch;
             const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
             const service = `${applicationName}/${serviceName}`.toLowerCase();
 
-            // Initialize addresses as an array of strings
-            let addresses: string[] = [];
-
-            // Attempt to parse the environment variable value as JSON 
-            // if it's a string that looks like a JSON array
-            // eg: ["localhost:3005", "localhost:5006"]
-            const rawAddresses = process.env[key];
-            if (rawAddresses && rawAddresses.startsWith('[') && rawAddresses.endsWith(']')) {
-                try {
-                    const parsedAddresses = JSON.parse(rawAddresses);
-                    // Ensure parsedAddresses is actually an array of strings
-                    if (Array.isArray(parsedAddresses) && parsedAddresses.every(addr => typeof addr === 'string')) {
-                        addresses = parsedAddresses;
-                    } else {
-                        console.warn(`Parsed addresses for ${key} are not a string array.`);
-                    }
-                } catch (e) {
-                    console.error(`Error parsing JSON for ${key}:`, e);
-                }
-            } else if (rawAddresses) {
-                // If it's a simple string (not JSON), just use it directly
-                addresses = [rawAddresses];
+            const rawAddress = process.env[key];
+            if (rawAddress) {
+                // Do base64 decoding
+                const address = Buffer.from(rawAddress, 'base64').toString('utf-8');
+                endpoints[addressKey] = {service: service, address, routes: [], applicationName, serviceName};
+            } else {
+                console.warn(`Environment variable ${key} is not set`);
             }
-
-            endpoints[addressKey] = { service: service, addresses, routes: [], applicationName, serviceName };
         }
     });
 }
