@@ -9,9 +9,9 @@ describe('parseEnvVariables', () => {
         beforeAll(() => {
             process.env = {
                 ...process.env,
-                'CODEFLY_ENDPOINT__BACKEND__API___REST': '["localhost:24282"]',
-                'CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__GREETER_____GET': 'public',
-                'CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____POST': 'application',
+                'CODEFLY__ENDPOINT__BACKEND__API__NAME__REST': 'aHR0cDovL2xvY2FsaG9zdDozMDAw',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
             };
 
             endpoints = getEndpoints();
@@ -26,7 +26,7 @@ describe('parseEnvVariables', () => {
             expect(endpoints.length).toBe(1);
             expect(endpoints[0].service).toBe('backend/api');
             expect(endpoints[0].addresses.length).toBe(1);
-            expect(endpoints[0].addresses[0]).toBe('localhost:24282');
+            expect(endpoints[0].addresses[0]).toBe('localhost:8080');
             expect(endpoints[0].routes.length).toBe(2);
             expect(endpoints[0].routes).toEqual([
                 { path: '/backend/server/greeter', method: 'GET', visibility: 'public' },
@@ -43,9 +43,9 @@ describe('parseEnvVariables', () => {
         beforeAll(() => {
             process.env = {
                 ...process.env,
-                'CODEFLY_ENDPOINT__BACKEND__API___REST': '["localhost:25001", "localhost:25002"]',
-                'CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__GREETER_____GET': 'public',
-                'CODEFLY_RESTROUTE__BACKEND__API___REST____BACKEND__SERVER__VERSION_____POST': 'application',
+                'CODEFLY__ENDPOINT__BACKEND__API__NAME__REST': 'aHR0cDovL2xvY2FsaG9zdDozMDAw',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
             };
 
             endpoints = getEndpoints();
