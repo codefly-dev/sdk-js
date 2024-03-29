@@ -20,7 +20,7 @@ describe('codefly getEndpointUrl', () => {
     it('should return the correct address for a given route', () => {
         // Mock environment variables
         process.env.CODEFLY__ENDPOINT__BACKEND__API__NAME__REST = encodedURL;
-        process.env.CODEFLY_RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
@@ -33,7 +33,7 @@ describe('codefly getEndpointUrl', () => {
     it('should return null if the method is not available', () => {
         // Mock environment variables
         process.env.CODEFLY__ENDPOINT__BACKEND__API__NAME__REST = encodedURL;
-        process.env.CODEFLY_RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
@@ -47,7 +47,7 @@ describe('codefly getEndpointUrl', () => {
     it('should return null if the route is not available', () => {
         // Mock environment variables
         process.env.CODEFLY__ENDPOINT__BACKEND__API__NAME__REST = encodedURL;
-        process.env.CODEFLY_RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
@@ -60,7 +60,7 @@ describe('codefly getEndpointUrl', () => {
     it('should return null if the service is not available', () => {
         // Mock environment variables
         process.env.CODEFLY__ENDPOINT__BACKEND__API__NAME__REST = encodedURL;
-        process.env.CODEFLY_RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');

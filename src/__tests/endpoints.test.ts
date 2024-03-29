@@ -14,8 +14,8 @@ describe('parseEnvVariables', () => {
             process.env = {
                 ...process.env,
                 'CODEFLY__ENDPOINT__BACKEND__API__NAME__REST': encodedURL,
-                'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
-                'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
+                'CODEFLY__RESTROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
             };
 
             endpoints = getEndpoints();
@@ -38,4 +38,3 @@ describe('parseEnvVariables', () => {
         });
     })
 });
-
