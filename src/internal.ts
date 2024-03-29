@@ -27,8 +27,6 @@ export function getEndpointUrl(method: Method, service: string, path: string, se
 }
 
 function getAddressFromServiceEndpoint(serviceEndpoint: ServiceEndpoint, path: string): string | null {
-    // There could be multiple addresses for a service endpoint ATM. 
     // codefly should be able to send a single url for a service endpoint
-    // right now we return the first address of the service endpoint.
-    return serviceEndpoint.addresses[0] ? `${serviceEndpoint.addresses[0]}${path}` : null;
+    return serviceEndpoint.address ? `${serviceEndpoint.address}${path}` : null;
 }

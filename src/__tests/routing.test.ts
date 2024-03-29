@@ -34,15 +34,15 @@ describe('routing', () => {
             const endpoints = [
                 {
                     service: 'counter-go-grpc-nextjs-postgres/api',
-                    addresses: [],
+                    address: 'http://localhost:8085',
                     routes: [],
                     applicationName: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
                     serviceName: 'API'
                   }
             ]
             
-            routing[method]("test-service", "/route/to", endpoints);
-            expect(spy).toHaveBeenCalledWith(method, "test-service", "/route/to", endpoints);
+            routing[method]("test-app/test-service", "/route/to", endpoints);
+            expect(spy).toHaveBeenCalledWith(method, "test-app/test-service", "/route/to", endpoints);
 
             spy.mockRestore();
         });
