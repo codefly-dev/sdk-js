@@ -39,7 +39,7 @@ function parseEndpointsFromEnv() {
 
 function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
-        const routeMatch = key.match(/^CODEFLY__RESTROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
+        const routeMatch = key.match(/^CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
         if (routeMatch) {
             const [, applicationName, serviceName, endpointName, rest, method] = routeMatch;
             const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
