@@ -16,21 +16,17 @@ function parseEndpointsFromEnv() {
     const endpoints: { [key: string]: ServiceEndpoint } = {};
 
     Object.keys(process.env).forEach((key) => {
-        // CODEFLY__ENDPOINT__BACKEND__API__NAME__REST
-        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__NAME__REST$/);
+        // CODEFLY__ENDPOINT__BACKEND__API__REST__REST
+        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__REST__REST$/);
 
         if (endpointMatch) {
+            console.log("endpointMatch", endpointMatch)
             const [, applicationName, serviceName] = endpointMatch;
             const addressKey = `${applicationName.toUpperCase()}_${serviceName.toUpperCase()}`;
             const service = `${applicationName}/${serviceName}`.toLowerCase();
-            const rawAddress = process.env[key];
-            if (rawAddress) {
-                // Do base64 decoding
-                const address = Buffer.from(rawAddress, 'base64').toString('utf-8');
-                endpoints[addressKey] = { service: service, address, routes: [], applicationName, serviceName };
-            } else {
-                console.warn(`Environment variable ${key} is not set`);
-            }
+            const address = process.env[key];
+
+            endpoints[addressKey] = { service: service, address: address ?? '', routes: [], applicationName, serviceName };
         }
     });
 
@@ -51,7 +47,7 @@ function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
             }
 
             // The method is the value of the environment variable
-            const visibility = process.env[key]  ?? '';
+            const visibility = process.env[key] ?? '';
             if (visibility === '') {
                 console.warn(`Visibility for route ${key} is not set`);
                 return;
@@ -85,7 +81,7 @@ export function getEndpointsMap() {
             if (rawAddress) {
                 // Do base64 decoding
                 const address = Buffer.from(rawAddress, 'base64').toString('utf-8');
-                endpoints[addressKey] = {service: service, address, routes: [], applicationName, serviceName};
+                endpoints[addressKey] = { service: service, address, routes: [], applicationName, serviceName };
             } else {
                 console.warn(`Environment variable ${key} is not set`);
             }

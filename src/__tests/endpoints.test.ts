@@ -1,7 +1,6 @@
 import { ServiceEndpoint, getEndpoints } from '../endpoints';
 
 const url = "http://localhost:8080";
-const encodedURL = "aHR0cDovL2xvY2FsaG9zdDo4MDgw";
 
 
 describe('parseEnvVariables', () => {
@@ -13,7 +12,7 @@ describe('parseEnvVariables', () => {
         beforeAll(() => {
             process.env = {
                 ...process.env,
-                'CODEFLY__ENDPOINT__BACKEND__API__NAME__REST': encodedURL,
+                'CODEFLY__ENDPOINT__BACKEND__API__REST__REST': url,
                 'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
                 'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
             };
