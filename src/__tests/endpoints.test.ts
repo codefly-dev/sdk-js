@@ -27,7 +27,7 @@ describe('parseEnvVariables', () => {
 
         it('should parse environment variables into endpoints and routes', () => {
             expect(endpoints.length).toBe(1);
-            expect(endpoints[0].service).toBe('backend/api');
+            expect(endpoints[0].service).toBe('api');
             expect(endpoints[0].address).toBe('http://localhost:8080');
             expect(endpoints[0].routes.length).toBe(2);
             expect(endpoints[0].routes).toEqual([
