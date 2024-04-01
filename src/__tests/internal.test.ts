@@ -24,7 +24,7 @@ describe('codefly getEndpointUrl', () => {
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend/api", "/backend/server/version");
+        const result = getEndpointUrl("GET", "backend", "backend/api", "/backend/server/version");
             
         expect(result).toEqual(`${url}/backend/server/version`);
     });
