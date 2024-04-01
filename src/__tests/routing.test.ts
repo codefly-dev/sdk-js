@@ -33,11 +33,10 @@ describe('routing', () => {
 
             const endpoints = [
                 {
-                    service: 'counter-go-grpc-nextjs-postgres/api',
+                    service: 'api',
                     address: 'http://localhost:8085',
                     routes: [],
                     application: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
-                    serviceName: 'API'
                   }
             ]
             

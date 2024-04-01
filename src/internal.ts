@@ -9,7 +9,7 @@ export function getEndpointUrl(method: Method, application: string, service: str
 
     const endpoints = serviceEndpoints ? serviceEndpoints : _endpoints;
     // Find the matching endpoint
-    const matchingEndpoint = endpoints.find(ep => ep.service === service);
+    const matchingEndpoint = endpoints.find(ep => ep.service === service && ep.application === application);
     if (!matchingEndpoint) {
         console.warn(`ServiceEndpoint ${service} not found.`);
         return null;
