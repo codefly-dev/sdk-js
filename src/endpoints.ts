@@ -6,7 +6,7 @@ export interface Route {
 
 export interface ServiceEndpoint {
     service: string;
-    application: string;
+    module: string;
     address: string;
     routes: Route[];
 }
@@ -19,13 +19,13 @@ function parseEndpointsFromEnv() {
         const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__REST__REST$/);
 
         if (endpointMatch) {
-            const [, application_key, service_key] = endpointMatch;
-            const addressKey = `${application_key.toUpperCase()}_${service_key.toUpperCase()}`;
+            const [, module_key, service_key] = endpointMatch;
+            const addressKey = `${module_key.toUpperCase()}_${service_key.toUpperCase()}`;
             const service = service_key.toLowerCase();
-            const application = application_key.toLowerCase();
+            const module = module_key.toLowerCase();
             const address = process.env[key];
 
-            endpoints[addressKey] = { service: service, address: address ?? '', routes: [], application };
+            endpoints[addressKey] = { service: service, address: address ?? '', routes: [], module };
         }
     });
 
@@ -36,12 +36,12 @@ function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
         const routeMatch = key.match(/^CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
         if (routeMatch) {
-            const [, application, service_key, endpointName, rest, method] = routeMatch;
-            const addressKey = `${application.toUpperCase()}_${service_key.toUpperCase()}`;
+            const [, module, service_key, endpointName, rest, method] = routeMatch;
+            const addressKey = `${module.toUpperCase()}_${service_key.toUpperCase()}`;
 
             // Ensure the endpoint exists before adding routes to it
             if (!endpoints[addressKey]) {
-                console.warn(`ServiceEndpoint for ${application}/${service_key} not found when processing route: ${key}`);
+                console.warn(`ServiceEndpoint for ${module}/${service_key} not found when processing route: ${key} ${addressKey} ${endpoints}`);
                 return;
             }
 
@@ -72,12 +72,12 @@ export function getEndpointsMap() {
         const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
 
         if (endpointMatch) {
-            const [, application, service_key, endpointName] = endpointMatch;
-            const addressKey = `${application.toUpperCase()}_${service_key.toUpperCase()}`;
+            const [, module, service_key, endpointName] = endpointMatch;
+            const addressKey = `${module.toUpperCase()}_${service_key.toUpperCase()}`;
             const service = service_key.toLowerCase();
 
             const address = process.env[key];
-            endpoints[addressKey] = { service: service, address: address ?? "", routes: [], application };
+            endpoints[addressKey] = { service: service, address: address ?? "", routes: [], module };
         }
     });
 }

@@ -5,11 +5,11 @@ import { Method } from "./types";
 
 var _endpoints: ServiceEndpoint[] = getEndpoints();
 
-export function getEndpointUrl(method: Method, application: string, service: string, path: string, serviceEndpoints?: ServiceEndpoint[]): string | null {
+export function getEndpointUrl(method: Method, module: string, service: string, path: string, serviceEndpoints?: ServiceEndpoint[]): string | null {
 
     const endpoints = serviceEndpoints ? serviceEndpoints : _endpoints;
     // Find the matching endpoint
-    const matchingEndpoint = endpoints.find(ep => ep.service === service && ep.application === application);
+    const matchingEndpoint = endpoints.find(ep => ep.service === service && ep.module === module);
     if (!matchingEndpoint) {
         console.warn(`ServiceEndpoint ${service} not found.`);
         return null;

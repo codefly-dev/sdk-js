@@ -36,7 +36,7 @@ describe('routing', () => {
                     service: 'api',
                     address: 'http://localhost:8085',
                     routes: [],
-                    application: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
+                    module: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
                   }
             ]
             
