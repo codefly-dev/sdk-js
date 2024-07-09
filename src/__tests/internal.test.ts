@@ -24,7 +24,7 @@ describe('codefly getEndpointUrl', () => {
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend/api", "/backend/server/version");
+        const result = getEndpointUrl("GET", "backend", "api", "/backend/server/version");
             
         expect(result).toEqual(`${url}/backend/server/version`);
     });
@@ -37,7 +37,7 @@ describe('codefly getEndpointUrl', () => {
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("POST", "backend/api", "/backend/server/version");
+        const result = getEndpointUrl("POST", "backend", "api", "/backend/server/version");
             
         expect(result).toEqual(null);
     });
@@ -51,7 +51,7 @@ describe('codefly getEndpointUrl', () => {
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend/api", "/backend/server/unavailable");
+        const result = getEndpointUrl("GET", "backend", "api", "/backend/server/unavailable");
             
         expect(result).toEqual(null);
     });
@@ -64,7 +64,7 @@ describe('codefly getEndpointUrl', () => {
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "unavailable", "/backend/server/version");
+        const result = getEndpointUrl("GET", "backend", "unavailable", "/backend/server/version");
             
         expect(result).toEqual(null);
     });
