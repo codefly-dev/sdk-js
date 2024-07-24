@@ -18,26 +18,26 @@ describe('codefly getEndpointUrl', () => {
 
     it('should return the correct address for a given route', () => {
         // Mock environment variables
-        process.env.CODEFLY__ENDPOINT__BACKEND__API__REST__REST = url;
-        process.env.CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
+        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend", "api", "/backend/server/version");
+        const result = getEndpointUrl("GET", "public", "api", "/users/backend/version");
             
-        expect(result).toEqual(`${url}/backend/server/version`);
+        expect(result).toEqual(`${url}/users/backend/version`);
     });
 
     it('should return null if the method is not available', () => {
         // Mock environment variables
-        process.env.CODEFLY__ENDPOINT__BACKEND__API__REST__REST = url;
-        process.env.CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
+        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("POST", "backend", "api", "/backend/server/version");
+        const result = getEndpointUrl("POST", "public", "api", "/users/backend/version");
             
         expect(result).toEqual(null);
     });
@@ -45,28 +45,27 @@ describe('codefly getEndpointUrl', () => {
 
     it('should return null if the route is not available', () => {
         // Mock environment variables
-        process.env.CODEFLY__ENDPOINT__BACKEND__API__REST__REST = url;
-        process.env.CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
+        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend", "api", "/backend/server/unavailable");
+        const result = getEndpointUrl("GET", "users", "api", "/users/server/version");
             
         expect(result).toEqual(null);
     });
 
     it('should return null if the service is not available', () => {
         // Mock environment variables
-        process.env.CODEFLY__ENDPOINT__BACKEND__API__REST__REST = url;
-        process.env.CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
+        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
         const { getEndpointUrl } = require('../internal');
 
-        const result = getEndpointUrl("GET", "backend", "unavailable", "/backend/server/version");
+        const result = getEndpointUrl("GET", "api", "unavailable", "/na");
             
         expect(result).toEqual(null);
     });
 });
-

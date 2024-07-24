@@ -5,7 +5,7 @@ import { Method } from '../types';
 
 describe('routing', () => {
     const httpMethods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"];
-    
+
     it("should have all HTTP methods", () => {
         // Check if each HTTP method is defined in httpFunctions
         httpMethods.forEach(method => {
@@ -14,37 +14,36 @@ describe('routing', () => {
     });
 
 
-    it("should call getEndpointUrl with correct params", () => {      
+    it("should call getEndpointUrl with correct params", () => {
         // Call each function with a path and check if common function is called
         httpMethods.forEach(method => {
             const spy = jest.spyOn(codefly, "getEndpointUrl");
-            
-            routing[method]("test-app", "test-service", "/route/to");
-            expect(spy).toHaveBeenCalledWith(method, "test-app", "test-service", "/route/to", undefined);
+
+            routing[method]("test-module", "test-service", "/route/to");
+            expect(spy).toHaveBeenCalledWith(method, "test-module", "test-service", "/route/to", undefined);
 
             spy.mockRestore();
         });
     });
 
-    it("should call getEndpointUrl with correct params with endpoints", () => {      
+    it("should call getEndpointUrl with correct params with endpoints", () => {
         // Call each function with a path and check if common function is called
         httpMethods.forEach(method => {
             const spy = jest.spyOn(codefly, "getEndpointUrl");
 
             const endpoints = [
                 {
-                    service: 'api',
+                    service: 'test-service',
                     address: 'http://localhost:8085',
                     routes: [],
-                    module: 'COUNTER-GO-GRPC-NEXTJS-POSTGRES',
+                    module: 'test-module',
                   }
             ]
-            
-            routing[method]("test-app" ,"test-app/test-service", "/route/to", endpoints);
-            expect(spy).toHaveBeenCalledWith(method, "test-app", "test-app/test-service", "/route/to", endpoints);
+
+            routing[method]("test-module" ,"test-service", "/route/to", endpoints);
+            expect(spy).toHaveBeenCalledWith(method, "test-module", "test-service", "/route/to", endpoints);
 
             spy.mockRestore();
         });
     });
 });
-

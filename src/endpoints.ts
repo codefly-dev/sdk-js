@@ -11,21 +11,30 @@ export interface ServiceEndpoint {
     routes: Route[];
 }
 
+export interface ModuleEndpoints {
+    name: string;
+    services: ServiceEndpoint[];
+}
+
+function endpointKey(module: string, service: string, endpointName: string) {
+    return `${module.toUpperCase()}_${service.toUpperCase()}_${endpointName.toUpperCase()}`;
+}
+
 function parseEndpointsFromEnv() {
     const endpoints: { [key: string]: ServiceEndpoint } = {};
 
     Object.keys(process.env).forEach((key) => {
-        // CODEFLY__ENDPOINT__BACKEND__API__REST__REST
-        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__REST__REST$/);
+        if (!key.startsWith("CODEFLY__ENDPOINT")) {
+            return;
+        }
+        // CODEFLY__ENDPOINT__{MODULE}__{SERVICE}__{NAME}__{TYPE}
+        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
 
         if (endpointMatch) {
-            const [, module_key, service_key] = endpointMatch;
-            const addressKey = `${module_key.toUpperCase()}_${service_key.toUpperCase()}`;
-            const service = service_key.toLowerCase();
-            const module = module_key.toLowerCase();
+            const [, module, service, endpointName] = endpointMatch;
+            const addressKey = endpointKey(module, service, endpointName);
             const address = process.env[key];
-
-            endpoints[addressKey] = { service: service, address: address ?? '', routes: [], module };
+            endpoints[addressKey] = { service: service.toLowerCase(), module: module.toLowerCase(), address: address ?? '', routes: [] };
         }
     });
 
@@ -34,14 +43,19 @@ function parseEndpointsFromEnv() {
 
 function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
+        if (!key.startsWith("CODEFLY__REST_ROUTE")) {
+            return;
+        }
+
         const routeMatch = key.match(/^CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
         if (routeMatch) {
-            const [, module, service_key, endpointName, rest, method] = routeMatch;
-            const addressKey = `${module.toUpperCase()}_${service_key.toUpperCase()}`;
+            const [, module, service, endpointName, route, method] = routeMatch;
+            const addressKey = endpointKey(module, service, endpointName);
+
 
             // Ensure the endpoint exists before adding routes to it
             if (!endpoints[addressKey]) {
-                console.warn(`ServiceEndpoint for ${module}/${service_key} not found when processing route: ${key} ${addressKey} ${endpoints}`);
+                console.warn(`ServiceEndpoint for ${module}/${service} not found when processing route: ${key} ${addressKey} ${endpoints}`);
                 return;
             }
 
@@ -52,7 +66,7 @@ function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
                 return;
             }
             // Transform 'rest' into a path by replacing '__' with '/'
-            const path = `/${rest.replace(/__/g, '/')}`.toLowerCase();
+            const path = `/${route.replace(/__/g, '/')}`.toLowerCase();
 
             if (method) {
                 endpoints[addressKey].routes.push({ path, method, visibility });
@@ -63,27 +77,25 @@ function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     });
 }
 
-
-export function getEndpointsMap() {
-    const map = {};
-    const endpoints: { [key: string]: ServiceEndpoint } = {};
-
-    Object.keys(process.env).forEach((key) => {
-        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
-
-        if (endpointMatch) {
-            const [, module, service_key, endpointName] = endpointMatch;
-            const addressKey = `${module.toUpperCase()}_${service_key.toUpperCase()}`;
-            const service = service_key.toLowerCase();
-
-            const address = process.env[key];
-            endpoints[addressKey] = { service: service, address: address ?? "", routes: [], module };
-        }
-    });
-}
-
 export function getEndpoints(): ServiceEndpoint[] {
     const endpoints = parseEndpointsFromEnv();
     parseRoutes(endpoints);
-    return Object.values(endpoints);
+    const serviceEndpoints = Object.values(endpoints);
+    console.log("serviceEndpoints", serviceEndpoints)
+    return serviceEndpoints;
+}
+
+export function getEndpointsByModule(): ModuleEndpoints[] {
+    const map: { [key: string]: ModuleEndpoints } = {};
+    const endpoints = getEndpoints();
+
+    endpoints.forEach((endpoint) => {
+        if (!map[endpoint.module]) {
+            map[endpoint.module] = { name: endpoint.module, services: [] };
+        }
+
+        map[endpoint.module].services.push(endpoint);
+    });
+
+    return Object.values(map);
 }

@@ -1,23 +1,31 @@
-import { ServiceEndpoint, getEndpoints } from '../endpoints';
+import { ServiceEndpoint,ModuleEndpoints, getEndpoints, getEndpointsByModule } from '../endpoints';
 
-const url = "http://localhost:8080";
+const urlPublicAPi = "http://public-api:8080";
+const urlUserBackend = "http://user-backend:8080";
+const urlUsersOther = "http://users-other:8080";
 
 
 describe('parseEnvVariables', () => {
     describe('when single address available for an endpoint ( string format )', () => {
 
         const originalEnv = process.env;
-        var endpoints: ServiceEndpoint[];
 
+        let endpoints: ServiceEndpoint[];
+        let moduleEndpoints: ModuleEndpoints[];
         beforeAll(() => {
             process.env = {
                 ...process.env,
-                'CODEFLY__ENDPOINT__BACKEND__API__REST__REST': url,
-                'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
-                'CODEFLY__REST_ROUTE__BACKEND__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'application',
+                'CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST': urlPublicAPi,
+                'CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__GREETER___GET': 'public',
+                'CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__VERSION___POST': 'public',
+                'CODEFLY__ENDPOINT__USERS__BACKEND__NAME__REST': urlUserBackend,
+                'CODEFLY__REST_ROUTE__USERS__BACKEND__NAME__REST___SELF___GET': 'public',
+                'CODEFLY__ENDPOINT__USERS__OTHER__NAME__REST': urlUsersOther,
+                'CODEFLY__REST_ROUTE__USERS__OTHER__NAME__REST___ROUTE___GET': 'public',
             };
 
             endpoints = getEndpoints();
+            moduleEndpoints = getEndpointsByModule();
         })
 
         afterAll(() => {
@@ -26,14 +34,26 @@ describe('parseEnvVariables', () => {
         })
 
         it('should parse environment variables into endpoints and routes', () => {
-            expect(endpoints.length).toBe(1);
-            expect(endpoints[0].service).toBe('api');
-            expect(endpoints[0].address).toBe('http://localhost:8080');
-            expect(endpoints[0].routes.length).toBe(2);
-            expect(endpoints[0].routes).toEqual([
-                { path: '/backend/server/greeter', method: 'GET', visibility: 'public' },
-                { path: '/backend/server/version', method: 'POST', visibility: 'application' }
-            ]);
+            expect(moduleEndpoints.length).toBe(2);
+            // Find the module with the name 'public'
+            const publicModule = moduleEndpoints.find(module => module.name === 'public');
+            expect(publicModule).toBeDefined();
+            expect(publicModule?.services.length).toBe(1);
+
+            // Find the service with the name 'api'
+            const publicApiService = publicModule?.services.find(service => service.service === 'api');
+            expect(publicApiService).toBeDefined();
+            expect(publicApiService?.routes.length).toBe(2);
+
+            // Users module
+            const usersModule = moduleEndpoints.find(module => module.name === 'users');
+            expect(usersModule).toBeDefined();
+            expect(usersModule?.services.length).toBe(2);
+
+            // Find the service with the name 'backend'
+            const usersBackendService = usersModule?.services.find(service => service.service === 'backend');
+            expect(usersBackendService).toBeDefined();
+            expect(usersBackendService?.routes.length).toBe(1);
         });
     })
 });

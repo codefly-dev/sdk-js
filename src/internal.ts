@@ -3,11 +3,13 @@
 import { ServiceEndpoint, getEndpoints } from "./endpoints";
 import { Method } from "./types";
 
-var _endpoints: ServiceEndpoint[] = getEndpoints();
+const _endpoints: ServiceEndpoint[] = getEndpoints();
 
 export function getEndpointUrl(method: Method, module: string, service: string, path: string, serviceEndpoints?: ServiceEndpoint[]): string | null {
 
     const endpoints = serviceEndpoints ? serviceEndpoints : _endpoints;
+
+    console.log("serviceEndpoints", endpoints)
     // Find the matching endpoint
     const matchingEndpoint = endpoints.find(ep => ep.service === service && ep.module === module);
     if (!matchingEndpoint) {
@@ -23,7 +25,6 @@ export function getEndpointUrl(method: Method, module: string, service: string, 
     }
 
     return getAddressFromServiceEndpoint(matchingEndpoint, path)
-
 }
 
 function getAddressFromServiceEndpoint(serviceEndpoint: ServiceEndpoint, path: string): string | null {
