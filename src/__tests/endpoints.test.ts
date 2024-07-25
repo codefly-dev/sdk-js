@@ -44,6 +44,10 @@ describe('parseEnvVariables', () => {
             const publicApiService = publicModule?.services.find(service => service.service === 'api');
             expect(publicApiService).toBeDefined();
             expect(publicApiService?.routes.length).toBe(2);
+            // Find a route with the path GET /server/greeter
+            const greeterRoute = publicApiService?.routes.find(route => route.path === '/backend/server/greeter' && route.method === 'GET');
+            expect(greeterRoute).toBeDefined();
+
 
             // Users module
             const usersModule = moduleEndpoints.find(module => module.name === 'users');
