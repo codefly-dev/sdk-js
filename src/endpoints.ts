@@ -81,7 +81,6 @@ export function getEndpoints(): ServiceEndpoint[] {
     const endpoints = parseEndpointsFromEnv();
     parseRoutes(endpoints);
     const serviceEndpoints = Object.values(endpoints);
-    console.log("serviceEndpoints", serviceEndpoints)
     return serviceEndpoints;
 }
 
