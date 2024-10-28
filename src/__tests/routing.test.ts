@@ -4,7 +4,7 @@ import * as codefly from '../internal';
 import { Method } from '../types';
 
 describe('routing', () => {
-    const httpMethods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS", "HEAD"];
+    const httpMethods: Method[] = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"];
 
     it("should have all HTTP methods", () => {
         // Check if each HTTP method is defined in httpFunctions

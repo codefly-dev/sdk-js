@@ -24,11 +24,8 @@ function parseEndpointsFromEnv() {
     const endpoints: { [key: string]: ServiceEndpoint } = {};
 
     Object.keys(process.env).forEach((key) => {
-        if (!key.startsWith("CODEFLY__ENDPOINT")) {
-            return;
-        }
-        // CODEFLY__ENDPOINT__{MODULE}__{SERVICE}__{NAME}__{TYPE}
-        const endpointMatch = key.match(/^CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
+        // {PREFIX}_CODEFLY__ENDPOINT__{MODULE}__{SERVICE}__{NAME}__{TYPE}
+        const endpointMatch = key.match(/CODEFLY__ENDPOINT__(.+)__(.+)__(.*)__REST$/);
 
         if (endpointMatch) {
             const [, module, service, endpointName] = endpointMatch;
@@ -43,11 +40,7 @@ function parseEndpointsFromEnv() {
 
 function parseRoutes(endpoints: { [key: string]: ServiceEndpoint }) {
     Object.keys(process.env).forEach((key) => {
-        if (!key.startsWith("CODEFLY__REST_ROUTE")) {
-            return;
-        }
-
-        const routeMatch = key.match(/^CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
+        const routeMatch = key.match(/CODEFLY__REST_ROUTE__(.+)__(.+)__(.*)__REST___(.+)___(.*)$/);
         if (routeMatch) {
             const [, module, service, endpointName, route, method] = routeMatch;
             const addressKey = endpointKey(module, service, endpointName);
@@ -98,3 +91,16 @@ export function getEndpointsByModule(): ModuleEndpoints[] {
 
     return Object.values(map);
 }
+
+
+export const getCurrentModule = (): string => {
+    const moduleKey = Object.keys(process.env).find(key => 
+        key.match(/.*CODEFLY__MODULE$/)
+    );
+    
+    if (!moduleKey) {
+        throw new Error('No environment variable ending with CODEFLY__MODULE found');
+    }
+    
+    return process.env[moduleKey]?.toLowerCase() || '';
+};
