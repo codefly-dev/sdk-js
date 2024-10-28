@@ -93,22 +93,20 @@ export function getEndpointsByModule(): ModuleEndpoints[] {
 }
 
 
-export const getCurrentModule = (): string => {
-    const moduleRegex = /CODEFLY__MODULE/;
+export function getCurrentModule(): string {
+    const moduleRegex = /.*CODEFLY__MODULE$/;
     const moduleEnvVar = Object.keys(process.env).find(key => moduleRegex.test(key));
     return moduleEnvVar ? process.env[moduleEnvVar] || '' : '';
-};
+}
 
-
-export const getCurrentService = (): string => {
-    const serviceRegex = /CODEFLY__SERVICE(?:__.*)?$/;
+export function getCurrentService(): string {
+    const serviceRegex = /.*CODEFLY__SERVICE$/;
     const serviceEnvVar = Object.keys(process.env).find(key => serviceRegex.test(key));
     return serviceEnvVar ? process.env[serviceEnvVar] || '' : '';
 }
 
-export const getCurrentServiceVersion = (): string => {
-    const versionRegex = /CODEFLY__SERVICE_VERSION(?:__.*)?$/;
+export function getCurrentServiceVersion(): string {
+    const versionRegex = /.*CODEFLY__SERVICE_VERSION$/;
     const versionEnvVar = Object.keys(process.env).find(key => versionRegex.test(key));
     return versionEnvVar ? process.env[versionEnvVar] || '' : '';
 }
-

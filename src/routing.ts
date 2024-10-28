@@ -1,7 +1,8 @@
-import { ServiceEndpoint } from './endpoints';
-import { getEndpointUrl } from './internal';
+import { ServiceEndpoint } from './parsing';
 import { Method, httpMethods } from './types';
 import { RouteNotFoundError } from './errors';
+import { getCurrentModule, getEndpoints } from './parsing';
+
 
 // Define an empty object to hold the httpFunctions
 export const routing: { [key in Method]: (module: string, service: string, path: string, endpoints?: ServiceEndpoint[]) => string | null } = {} as any;
@@ -20,13 +21,15 @@ interface EndpointRequest {
 }
 
 export const endpoint = ({
-    module = getCurrentModule(),
+    module,
     service,
     path,
     method = 'GET'
 }: EndpointRequest): string => {
-    const currentModule = getCurrentModule();
-    const url = getEndpointUrl(method, currentModule, service, path);
+    if (!module) {
+        module = getCurrentModule();
+    }
+    const url = getEndpointUrl(method, module, service, path);
     
     if (!url) {
         throw new RouteNotFoundError(method, path);
@@ -65,20 +68,30 @@ export async function fetchEndpoint<T = any>(options: EndpointOptions): Promise<
     return response.json();
 }
 
-function getCurrentModule(): string {
-    const moduleRegex = /.*CODEFLY__MODULE$/;
-    const moduleEnvVar = Object.keys(process.env).find(key => moduleRegex.test(key));
-    return moduleEnvVar ? process.env[moduleEnvVar] || '' : '';
+const _endpoints: ServiceEndpoint[] = getEndpoints();
+
+export function getEndpointUrl(method: Method, module: string, service: string, path: string, serviceEndpoints?: ServiceEndpoint[]): string | null {
+
+    const endpoints = serviceEndpoints ? serviceEndpoints : _endpoints;
+
+    // Find the matching endpoint
+    const matchingEndpoint = endpoints.find(ep => ep.service === service && ep.module === module);
+    if (!matchingEndpoint) {
+        console.warn(`ServiceEndpoint ${service} not found.`);
+        return null;
+    }
+
+    // Find the matching route
+    const matchingRoute = matchingEndpoint.routes.find(route => route.path === path && route.method.toLowerCase() === method.toLowerCase());
+    if (!matchingRoute) {
+        console.warn(`Route ${path} with method ${method} not found in endpoint ${service}.`);
+        return null;
+    }
+
+    return getAddressFromServiceEndpoint(matchingEndpoint, path)
 }
 
-function getCurrentService(): string {
-    const serviceRegex = /.*CODEFLY__SERVICE$/;
-    const serviceEnvVar = Object.keys(process.env).find(key => serviceRegex.test(key));
-    return serviceEnvVar ? process.env[serviceEnvVar] || '' : '';
-}
-
-function getCurrentServiceVersion(): string {
-    const versionRegex = /.*CODEFLY__SERVICE_VERSION$/;
-    const versionEnvVar = Object.keys(process.env).find(key => versionRegex.test(key));
-    return versionEnvVar ? process.env[versionEnvVar] || '' : '';
+function getAddressFromServiceEndpoint(serviceEndpoint: ServiceEndpoint, path: string): string | null {
+    // codefly should be able to send a single url for a service endpoint
+    return serviceEndpoint.address ? `${serviceEndpoint.address}${path}` : null;
 }

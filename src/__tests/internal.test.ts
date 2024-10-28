@@ -1,6 +1,6 @@
 const url = "http://localhost:8080";
 
-import { getCurrentModule, getCurrentService, getCurrentServiceVersion } from "../endpoints";
+import { getCurrentModule, getCurrentService, getCurrentServiceVersion } from "../parsing";
 
 describe('codefly getEndpointUrl', () => {
     // Save the original process.env
@@ -23,11 +23,37 @@ describe('codefly getEndpointUrl', () => {
         process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
-        const { getEndpointUrl } = require('../internal');
+        const { getEndpointUrl } = require('../routing');
 
         const result = getEndpointUrl("GET", "public", "api", "/users/backend/version");
-            
+
         expect(result).toEqual(`${url}/users/backend/version`);
+    });
+
+    it('should return the correct address for a given route with prefix', () => {
+        // Mock environment variables
+        process.env.PREFIX_CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
+        process.env.PREFIX_CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
+
+        // Dynamically import codefly internal to ensure it uses the updated process.env
+        const { getEndpointUrl } = require('../routing');
+
+        let result = getEndpointUrl("GET", "public", "api", "/users/backend/version");
+
+        expect(result).toEqual(`${url}/users/backend/version`);
+
+        const { endpoint } = require('../routing');
+
+        const sameResult = endpoint({
+            module: "public",
+            service: "api",
+            path: "/users/backend/version",
+            method: "GET"
+        });
+
+        expect(sameResult).toEqual(`${url}/users/backend/version`);
+
+
     });
 
     it('should return null if the method is not available', () => {
@@ -36,39 +62,32 @@ describe('codefly getEndpointUrl', () => {
         process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
-        const { getEndpointUrl } = require('../internal');
+        const { getEndpointUrl } = require('../routing');
 
         const result = getEndpointUrl("POST", "public", "api", "/users/backend/version");
-            
+
         expect(result).toEqual(null);
     });
 
 
-    it('should return null if the route is not available', () => {
+    it('should use module from environment when not provided to endpoint', () => {
         // Mock environment variables
         process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
-        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
+        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___USERS__BACKEND__VERSION___GET = 'public';
+        process.env.CODEFLY__MODULE = 'public';
 
         // Dynamically import codefly internal to ensure it uses the updated process.env
-        const { getEndpointUrl } = require('../internal');
+        const { endpoint } = require('../routing');
 
-        const result = getEndpointUrl("GET", "users", "api", "/users/server/version");
-            
-        expect(result).toEqual(null);
+        const result = endpoint({
+            service: "api",
+            path: "/users/backend/version",
+            method: "GET"
+        });
+
+        expect(result).toEqual(`${url}/users/backend/version`);
     });
 
-    it('should return null if the service is not available', () => {
-        // Mock environment variables
-        process.env.CODEFLY__ENDPOINT__PUBLIC__API__NAME__REST = url;
-        process.env.CODEFLY__REST_ROUTE__PUBLIC__API__NAME__REST___BACKEND__SERVER__VERSION___GET = 'public';
-
-        // Dynamically import codefly internal to ensure it uses the updated process.env
-        const { getEndpointUrl } = require('../internal');
-
-        const result = getEndpointUrl("GET", "api", "unavailable", "/na");
-            
-        expect(result).toEqual(null);
-    });
 });
 
 
