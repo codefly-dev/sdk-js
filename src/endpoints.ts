@@ -104,3 +104,17 @@ export const getCurrentModule = (): string => {
     
     return process.env[moduleKey]?.toLowerCase() || '';
 };
+
+
+export const getCurrentService = (): string => {
+    const serviceRegex = /^CODEFLY__SERVICE(?:__.*)?$/;
+    const serviceEnvVar = Object.keys(process.env).find(key => serviceRegex.test(key));
+    return serviceEnvVar ? process.env[serviceEnvVar] || '' : '';
+}
+
+export const getCurrentServiceVersion = (): string => {
+    const versionRegex = /^CODEFLY__SERVICE_VERSION(?:__.*)?$/;
+    const versionEnvVar = Object.keys(process.env).find(key => versionRegex.test(key));
+    return versionEnvVar ? process.env[versionEnvVar] || '' : '';
+}
+

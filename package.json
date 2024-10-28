@@ -1,6 +1,6 @@
 {
   "name": "codefly",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "description": "Get the power of codefly in your JS apps",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
