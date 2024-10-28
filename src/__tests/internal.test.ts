@@ -1,5 +1,6 @@
 const url = "http://localhost:8080";
 
+import { getCurrentModule, getCurrentService, getCurrentServiceVersion } from "../endpoints";
 
 describe('codefly getEndpointUrl', () => {
     // Save the original process.env
@@ -67,5 +68,67 @@ describe('codefly getEndpointUrl', () => {
         const result = getEndpointUrl("GET", "api", "unavailable", "/na");
             
         expect(result).toEqual(null);
+    });
+});
+
+
+
+describe('getCurrentModule', () => {
+    beforeEach(() => {
+        process.env = {};
+    });
+
+    it('should get module from CODEFLY__MODULE', () => {
+        process.env.CODEFLY__MODULE = 'mymodule';
+        expect(getCurrentModule()).toBe('mymodule');
+    });
+
+    it('should get module with prefix', () => {
+        process.env.NEXT_PUBLIC_CODEFLY__MODULE = 'mymodule';
+        expect(getCurrentModule()).toBe('mymodule');
+    });
+
+    it('should return empty string if no module env var', () => {
+        expect(getCurrentModule()).toBe('');
+    });
+});
+
+describe('getCurrentService', () => {
+    beforeEach(() => {
+        process.env = {};
+    });
+
+    it('should get service from CODEFLY__SERVICE', () => {
+        process.env.CODEFLY__SERVICE = 'myservice';
+        expect(getCurrentService()).toBe('myservice');
+    });
+
+    it('should get service with prefix', () => {
+        process.env.NEXT_PUBLIC_CODEFLY__SERVICE = 'myservice';
+        expect(getCurrentService()).toBe('myservice');
+    });
+
+    it('should return empty string if no service env var', () => {
+        expect(getCurrentService()).toBe('');
+    });
+});
+
+describe('getCurrentServiceVersion', () => {
+    beforeEach(() => {
+        process.env = {};
+    });
+
+    it('should get version from CODEFLY__SERVICE_VERSION', () => {
+        process.env.CODEFLY__SERVICE_VERSION = 'v1';
+        expect(getCurrentServiceVersion()).toBe('v1');
+    });
+
+    it('should get version with prefix', () => {
+        process.env.NEXT_PUBLIC_CODEFLY__SERVICE_VERSION = 'v2';
+        expect(getCurrentServiceVersion()).toBe('v2');
+    });
+
+    it('should return empty string if no version env var', () => {
+        expect(getCurrentServiceVersion()).toBe('');
     });
 });

@@ -94,26 +94,20 @@ export function getEndpointsByModule(): ModuleEndpoints[] {
 
 
 export const getCurrentModule = (): string => {
-    const moduleKey = Object.keys(process.env).find(key => 
-        key.match(/.*CODEFLY__MODULE$/)
-    );
-    
-    if (!moduleKey) {
-        throw new Error('No environment variable ending with CODEFLY__MODULE found');
-    }
-    
-    return process.env[moduleKey]?.toLowerCase() || '';
+    const moduleRegex = /CODEFLY__MODULE/;
+    const moduleEnvVar = Object.keys(process.env).find(key => moduleRegex.test(key));
+    return moduleEnvVar ? process.env[moduleEnvVar] || '' : '';
 };
 
 
 export const getCurrentService = (): string => {
-    const serviceRegex = /^CODEFLY__SERVICE(?:__.*)?$/;
+    const serviceRegex = /CODEFLY__SERVICE(?:__.*)?$/;
     const serviceEnvVar = Object.keys(process.env).find(key => serviceRegex.test(key));
     return serviceEnvVar ? process.env[serviceEnvVar] || '' : '';
 }
 
 export const getCurrentServiceVersion = (): string => {
-    const versionRegex = /^CODEFLY__SERVICE_VERSION(?:__.*)?$/;
+    const versionRegex = /CODEFLY__SERVICE_VERSION(?:__.*)?$/;
     const versionEnvVar = Object.keys(process.env).find(key => versionRegex.test(key));
     return versionEnvVar ? process.env[versionEnvVar] || '' : '';
 }

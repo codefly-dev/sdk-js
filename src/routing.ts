@@ -2,7 +2,6 @@ import { ServiceEndpoint } from './endpoints';
 import { getEndpointUrl } from './internal';
 import { Method, httpMethods } from './types';
 import { RouteNotFoundError } from './errors';
-import { getCurrentModule } from './endpoints';
 
 // Define an empty object to hold the httpFunctions
 export const routing: { [key in Method]: (module: string, service: string, path: string, endpoints?: ServiceEndpoint[]) => string | null } = {} as any;
@@ -64,4 +63,22 @@ export async function fetchEndpoint<T = any>(options: EndpointOptions): Promise<
     }
 
     return response.json();
+}
+
+function getCurrentModule(): string {
+    const moduleRegex = /.*CODEFLY__MODULE$/;
+    const moduleEnvVar = Object.keys(process.env).find(key => moduleRegex.test(key));
+    return moduleEnvVar ? process.env[moduleEnvVar] || '' : '';
+}
+
+function getCurrentService(): string {
+    const serviceRegex = /.*CODEFLY__SERVICE$/;
+    const serviceEnvVar = Object.keys(process.env).find(key => serviceRegex.test(key));
+    return serviceEnvVar ? process.env[serviceEnvVar] || '' : '';
+}
+
+function getCurrentServiceVersion(): string {
+    const versionRegex = /.*CODEFLY__SERVICE_VERSION$/;
+    const versionEnvVar = Object.keys(process.env).find(key => versionRegex.test(key));
+    return versionEnvVar ? process.env[versionEnvVar] || '' : '';
 }
