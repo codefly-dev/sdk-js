@@ -1,13 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es6", // Or a higher target like es2020 if you're using a newer Node.js version
+    "target": "ES2020",
     "module": "CommonJS",
     "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "lib": ["ES2020", "DOM"]
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "src/__tests/**"]
 }

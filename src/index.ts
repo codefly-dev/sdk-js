@@ -1,4 +1,42 @@
-export { routing } from './routing';
-export { ServiceEndpoint, ModuleEndpoints, Route } from './parsing'
-export { getCurrentModule, getCurrentService, getCurrentServiceVersion, getEndpoints, getEndpointsByModule } from './parsing'
-export { getEndpointUrl, endpoint, fetchEndpoint } from './routing'
+// Public surface of the codefly JS SDK.
+
+// Types (single source of truth lives in ./types).
+export type {
+  Method,
+  Protocol,
+  Route,
+  ServiceEndpoint,
+  ModuleEndpoints,
+  EndpointRequest,
+} from "./types";
+export { httpMethods } from "./types";
+
+// Env-var parsing + introspection.
+export {
+  getEndpoints,
+  getEndpointsByProtocol,
+  getEndpointsByModule,
+  getCurrentModule,
+  getCurrentService,
+  getCurrentServiceVersion,
+} from "./parsing";
+
+// URL resolution + typed fetch.
+export {
+  routing,
+  endpoint,
+  getEndpointUrl,
+  fetchEndpoint,
+  HttpError,
+} from "./routing";
+export type { FetchEndpointOptions } from "./routing";
+
+// Errors.
+export { RouteNotFoundError } from "./errors";
+
+// Test-harness integration: JS equivalent of Go's sdk.WithDependencies.
+export { withDependencies } from "./dependencies";
+export type {
+  WithDependenciesOptions,
+  Dependencies,
+} from "./dependencies";

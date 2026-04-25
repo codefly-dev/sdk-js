@@ -1,15 +1,30 @@
 {
   "name": "codefly",
-  "version": "0.0.27",
-  "description": "Get the power of codefly in your JS apps",
+  "version": "0.0.28",
+  "description": "codefly JS/TS SDK — endpoint resolution + test-harness orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "test": "jest",
     "build-ts": "tsc",
+    "build": "npm run build-ts",
     "prepack": "npm run build-ts",
-    "prepublish" : "npm run build-ts",
-    "publish": "npm publish"
+    "prepublishOnly": "npm run build-ts && npm test"
   },
   "repository": {
     "type": "git",
@@ -18,7 +33,9 @@
   "keywords": [
     "codefly",
     "sdk",
-    "js"
+    "testing",
+    "e2e",
+    "dependencies"
   ],
   "author": "codefly.ai",
   "license": "ISC",
@@ -28,6 +45,7 @@
   "homepage": "https://github.com/codefly-dev/sdk-js#readme",
   "devDependencies": {
     "@types/jest": "^29.5.12",
+    "@types/node": "^25.6.0",
     "jest": "^29.7.0",
     "ts-jest": "^29.1.2",
     "typescript": "^5.3.3"
