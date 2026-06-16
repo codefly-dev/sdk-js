@@ -14,7 +14,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-export type EndpointProtocol = "rest" | "connect" | "grpc";
+export type EndpointProtocol = "rest" | "connect" | "grpc" | "http";
 
 export interface ResolveOptions {
   /** Naming scope the stack runs under (matches withDependencies). */
