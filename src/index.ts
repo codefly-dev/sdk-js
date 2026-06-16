@@ -40,3 +40,10 @@ export type {
   WithDependenciesOptions,
   Dependencies,
 } from "./dependencies";
+
+// Endpoint address resolution (workspace-correct ports via codefly).
+export {
+  resolveServiceAddress,
+  resolveServiceAddressSync,
+} from "./resolve";
+export type { EndpointProtocol, ResolveOptions } from "./resolve";

@@ -27,6 +27,7 @@
 //     "well, maybe it worked" paths.
 
 import { ChildProcess, spawn } from "node:child_process";
+import { resolveServiceAddress } from "./resolve";
 
 export interface WithDependenciesOptions {
   /** Service to run. For a full stack this is usually the edge service
@@ -67,10 +68,18 @@ export interface WithDependenciesOptions {
    *  the frontend or api homepage. Defaults to "/" on the base URL. */
   readyPath?: string;
 
-  /** Explicit base URL to poll. If omitted, the SDK reads
-   *  CODEFLY__ENDPOINT__…__REST from env after the stack is up (the
-   *  running CLI writes those into the test process's env). */
+  /** Explicit base URL to poll. If omitted, the SDK resolves the
+   *  `readyService`'s REST address from codefly (`codefly get endpoints`),
+   *  so the probe targets the correct workspace-derived port instead of a
+   *  hardcoded guess. */
   baseURL?: string;
+
+  /** Service whose REST endpoint is polled for readiness when `baseURL`
+   *  is omitted. Defaults to `service` — but with --exclude-root you
+   *  typically probe a DEPENDENCY (e.g. "api"), since the root service
+   *  isn't started here. The address is resolved deterministically via
+   *  `codefly get endpoints <readyService> --type rest`. */
+  readyService?: string;
 
   /** Max wait for the stack to become ready. Default 90s — cold starts
    *  with docker image pulls can hit 60s; the ceiling is a safety net. */
@@ -202,7 +211,20 @@ export async function withDependencies(
     spawnError = err;
   });
 
-  const baseURL = opts.baseURL ?? "http://localhost:21931";
+  // Resolve the readiness URL. Prefer an explicit baseURL; otherwise ask
+  // codefly for the probe service's REST address (deterministic, correct for
+  // THIS workspace's port hash) instead of hardcoding a port that only
+  // happens to be right in the workspace it was copied from.
+  let baseURL = opts.baseURL;
+  if (!baseURL) {
+    const probe = opts.readyService ?? opts.service;
+    baseURL =
+      (await resolveServiceAddress(probe, "rest", {
+        scope,
+        cwd: opts.cwd,
+        codeflyBinary: bin,
+      })) ?? "http://localhost:21931";
+  }
   const readyURL = baseURL.replace(/\/$/, "") + (opts.readyPath ?? "/");
   const readyTimeoutMs = opts.readyTimeoutMs ?? 90_000;
 
