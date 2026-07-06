@@ -47,3 +47,25 @@ export {
   resolveServiceAddressSync,
 } from "./resolve";
 export type { EndpointProtocol, ResolveOptions } from "./resolve";
+
+// Typed settings/preferences helpers.
+export {
+  settings,
+  settingKey,
+  getSetting,
+  setSetting,
+  settingUpdate,
+  setSettings,
+  assignSetting,
+  mergeSettingPatch,
+  createSettingsStore,
+} from "./settings";
+export type {
+  DeepPartial,
+  SettingKey,
+  SettingKeyOptions,
+  SettingPath,
+  SettingUpdate,
+  SettingsStore,
+  SettingsStoreOptions,
+} from "./settings";
