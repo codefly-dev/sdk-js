@@ -19,6 +19,7 @@ export {
   getCurrentModule,
   getCurrentService,
   getCurrentServiceVersion,
+  getCurrentFixture,
 } from "./parsing";
 
 // URL resolution + typed fetch.

@@ -1,6 +1,6 @@
 {
   "name": "codefly",
-  "version": "0.0.28",
+  "version": "0.0.29",
   "description": "codefly JS/TS SDK — endpoint resolution + test-harness orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

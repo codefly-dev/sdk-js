@@ -7,6 +7,7 @@ import {
   getCurrentModule,
   getCurrentService,
   getCurrentServiceVersion,
+  getCurrentFixture,
 } from "../parsing";
 
 const url = "http://localhost:8080";
@@ -80,7 +81,7 @@ describe("codefly getEndpointUrl", () => {
   // Connect-ES clients couldn't discover their endpoint via the SDK.
   it("exposes CONNECT endpoints via getEndpointsByProtocol", () => {
     process.env.CODEFLY__ENDPOINT__PUBLIC__API__RPC__CONNECT =
-      "http://localhost:9090";
+      "localhost:9090";
     const { getEndpointsByProtocol } = require("../parsing");
     const connects = getEndpointsByProtocol("CONNECT");
     expect(connects).toHaveLength(1);
@@ -169,5 +170,23 @@ describe("getCurrentServiceVersion", () => {
 
   it("returns empty string when not set", () => {
     expect(getCurrentServiceVersion()).toBe("");
+  });
+});
+
+describe("getCurrentFixture", () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("returns the fixture selected by Codefly", () => {
+    process.env = { CODEFLY__FIXTURE: "codefly" };
+    expect(getCurrentFixture()).toBe("codefly");
+  });
+
+  it("returns an empty string when no fixture is selected", () => {
+    process.env = {};
+    expect(getCurrentFixture()).toBe("");
   });
 });

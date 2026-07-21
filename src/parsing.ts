@@ -60,6 +60,18 @@ function envSource(): NodeJS.ProcessEnv {
     : ({} as NodeJS.ProcessEnv);
 }
 
+const BARE_HTTP_AUTHORITY = /^(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\]):\d{1,5}$/;
+
+/** Codefly's REST/Connect runtimes may expose either a URL or host:port.
+ *  The SDK contract is a URL, so normalize the transport detail here once. */
+function endpointAddress(protocol: Protocol, value: string): string {
+  const address = value.trim();
+  if ((protocol === "REST" || protocol === "CONNECT") && BARE_HTTP_AUTHORITY.test(address)) {
+    return `http://${address}`;
+  }
+  return address;
+}
+
 function parseEndpoints(): Record<string, ServiceEndpoint> {
   const env = envSource();
   const out: Record<string, ServiceEndpoint> = {};
@@ -74,7 +86,7 @@ function parseEndpoints(): Record<string, ServiceEndpoint> {
       service: svc.toLowerCase(),
       name: name.toLowerCase(),
       protocol,
-      address: env[key] ?? "",
+      address: endpointAddress(protocol, env[key] ?? ""),
       routes: [],
     };
   }
@@ -142,4 +154,9 @@ export function getCurrentService(): string {
 
 export function getCurrentServiceVersion(): string {
   return findBySuffix("CODEFLY__SERVICE_VERSION");
+}
+
+/** Fixture selected by the Codefly runtime, or an empty string when none is active. */
+export function getCurrentFixture(): string {
+  return findBySuffix("CODEFLY__FIXTURE");
 }
