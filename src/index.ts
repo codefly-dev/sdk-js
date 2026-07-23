@@ -70,3 +70,38 @@ export type {
   SettingsStore,
   SettingsStoreOptions,
 } from "./settings";
+
+// Signed, audience-bound Task/Session authority propagation.
+export {
+  WORK_CONTEXT_ALGORITHM,
+  WORK_CONTEXT_CLOCK_SKEW_SECONDS,
+  WORK_CONTEXT_DEFAULT_TTL_SECONDS,
+  WORK_CONTEXT_HEADER_NAME,
+  WORK_CONTEXT_MAX_ACTOR_DEPTH,
+  WORK_CONTEXT_MAX_TOKEN_BYTES,
+  WORK_CONTEXT_MAX_TTL_SECONDS,
+  WORK_CONTEXT_REPLAY_IDEMPOTENT,
+  WORK_CONTEXT_REPLAY_SINGLE_USE,
+  WORK_CONTEXT_TYPE,
+  WorkContextError,
+  WorkContextSigner,
+  WorkContextToken,
+  WorkContextVerifier,
+  attachWorkContext,
+  parseWorkContextToken,
+  withWorkContext,
+  workContextFromHeaders,
+} from "./work-context";
+export type {
+  StartChildSessionInput,
+  StartSessionInput,
+  StartTaskInput,
+  WorkActorV1,
+  WorkContextExpectations,
+  WorkContextKeyLike,
+  WorkContextReplayPolicy,
+  WorkContextSignerOptions,
+  WorkContextV1,
+  WorkContextVerifierOptions,
+  WorkScopeV1,
+} from "./work-context";
