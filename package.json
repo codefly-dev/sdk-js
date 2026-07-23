@@ -1,6 +1,6 @@
 {
   "name": "codefly",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "description": "codefly JS/TS SDK — endpoint resolution + test-harness orchestration",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -23,6 +23,7 @@
     "test": "jest",
     "build-ts": "tsc",
     "build": "npm run build-ts",
+    "prepare": "npm run build-ts",
     "prepack": "npm run build-ts",
     "prepublishOnly": "npm run build-ts && npm test"
   },
