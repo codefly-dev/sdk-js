@@ -98,6 +98,7 @@ export type {
   StartTaskInput,
   WorkActorV1,
   WorkContextExpectations,
+  WorkContextHeaders,
   WorkContextKeyLike,
   WorkContextReplayPolicy,
   WorkContextSignerOptions,

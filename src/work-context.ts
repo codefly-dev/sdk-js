@@ -68,6 +68,12 @@ export interface WorkContextV1 {
   projectId?: string;
 }
 
+/** Minimal standard Headers surface required by Work Context propagation. */
+export interface WorkContextHeaders {
+  set(name: string, value: string): void;
+  get(name: string): string | null;
+}
+
 export class WorkContextError extends Error {
   constructor(message: string) {
     super(`invalid Codefly Work Context: ${message}`);
@@ -103,11 +109,15 @@ export function parseWorkContextToken(encoded: string): WorkContextToken {
 
 /** Installs the SDK-owned Work Context carrier on a Headers object. */
 export function attachWorkContext(
-  headers: Headers,
+  headers: WorkContextHeaders,
   token: WorkContextToken,
 ): void {
-  if (!(headers instanceof Headers)) {
-    throw new WorkContextError("headers must be a Headers instance");
+  if (
+    headers === null ||
+    typeof headers !== "object" ||
+    typeof headers.set !== "function"
+  ) {
+    throw new WorkContextError("headers must implement set(name, value)");
   }
   headers.set(WORK_CONTEXT_HEADER_NAME, token.encoded());
 }
@@ -123,7 +133,9 @@ export function withWorkContext(
 }
 
 /** Extracts an opaque token. This does not verify it. */
-export function workContextFromHeaders(headers: Headers): WorkContextToken {
+export function workContextFromHeaders(
+  headers: WorkContextHeaders,
+): WorkContextToken {
   const encoded = headers.get(WORK_CONTEXT_HEADER_NAME);
   if (!encoded) throw new WorkContextError("missing HTTP header");
   return parseWorkContextToken(encoded);

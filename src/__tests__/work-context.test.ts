@@ -257,7 +257,15 @@ describe("Work Context v1", () => {
 
   test("owns HTTP attachment and extraction", () => {
     const { token } = testSigner().startTask(testInput());
-    const headers = new Headers();
+    const values = new Map<string, string>();
+    const headers = {
+      set(name: string, value: string) {
+        values.set(name.toLowerCase(), value);
+      },
+      get(name: string) {
+        return values.get(name.toLowerCase()) ?? null;
+      },
+    };
     attachWorkContext(headers, token);
     expect(headers.get(WORK_CONTEXT_HEADER_NAME)).toBe(token.encoded());
     expect(workContextFromHeaders(headers).encoded()).toBe(token.encoded());
