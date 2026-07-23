@@ -54,3 +54,13 @@ export interface EndpointRequest {
   path: string;
   method?: Method;
 }
+
+/** Select one declared service API without requiring a statically registered
+ * route. This is the JS equivalent of Go's Module(...).Service(...).API(...)
+ * network-instance lookup and is the correct boundary for plugin-owned routes. */
+export interface NetworkInstanceRequest {
+  module?: string;
+  service: string;
+  api: string;
+  protocol?: Protocol;
+}

@@ -5,10 +5,15 @@
 import {
   EndpointRequest,
   Method,
+  NetworkInstanceRequest,
   ServiceEndpoint,
   httpMethods,
 } from "./types";
-import { RouteNotFoundError } from "./errors";
+import {
+  NetworkInstanceAmbiguousError,
+  NetworkInstanceNotFoundError,
+  RouteNotFoundError,
+} from "./errors";
 import { getCurrentModule, getEndpoints } from "./parsing";
 
 // Exported keyed-by-method map for the `routing.GET(...)` call shape
@@ -62,6 +67,50 @@ export function getEndpointUrl(
   if (!route) return null;
 
   return match.address ? `${match.address}${path}` : null;
+}
+
+/** Resolve one declared service API to its injected network instance.
+ *
+ * Unlike endpoint(), this does not require a route to be present in Codefly's
+ * static route catalog. Product SDKs use it for routes contributed dynamically
+ * by a service plugin, while Codefly remains the sole owner of endpoint
+ * discovery and carrier parsing.
+ */
+export function networkInstance(
+  request: NetworkInstanceRequest,
+): ServiceEndpoint {
+  const module = (request.module ?? getCurrentModule()).trim().toLowerCase();
+  const service = request.service.trim().toLowerCase();
+  const api = request.api.trim().toLowerCase();
+  const matches = getEndpoints().filter(
+    (candidate) =>
+      candidate.module === module &&
+      candidate.service === service &&
+      candidate.name === api &&
+      (request.protocol === undefined ||
+        candidate.protocol === request.protocol),
+  );
+  if (matches.length === 0) {
+    throw new NetworkInstanceNotFoundError(
+      module,
+      service,
+      api,
+      request.protocol,
+    );
+  }
+  if (matches.length > 1) {
+    throw new NetworkInstanceAmbiguousError(module, service, api);
+  }
+  const [match] = matches;
+  if (match.address.trim() === "") {
+    throw new NetworkInstanceNotFoundError(
+      module,
+      service,
+      api,
+      request.protocol,
+    );
+  }
+  return match;
 }
 
 // -- fetchEndpoint --------------------------------------------------------

@@ -8,6 +8,7 @@ export type {
   ServiceEndpoint,
   ModuleEndpoints,
   EndpointRequest,
+  NetworkInstanceRequest,
 } from "./types";
 export { httpMethods } from "./types";
 
@@ -28,12 +29,17 @@ export {
   endpoint,
   getEndpointUrl,
   fetchEndpoint,
+  networkInstance,
   HttpError,
 } from "./routing";
 export type { FetchEndpointOptions } from "./routing";
 
 // Errors.
-export { RouteNotFoundError } from "./errors";
+export {
+  NetworkInstanceAmbiguousError,
+  NetworkInstanceNotFoundError,
+  RouteNotFoundError,
+} from "./errors";
 
 // Test-harness integration: JS equivalent of Go's sdk.WithDependencies.
 export { withDependencies } from "./dependencies";

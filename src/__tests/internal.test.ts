@@ -98,6 +98,56 @@ describe("codefly getEndpointUrl", () => {
     expect(grpcs[0].protocol).toEqual("GRPC");
   });
 
+  it("resolves a plugin-capable REST network instance without a route", () => {
+    process.env.CODEFLY__ENDPOINT__PLATFORM__WARDEN__REST__REST = url;
+    const { networkInstance } = require("../routing");
+    expect(
+      networkInstance({
+        module: "platform",
+        service: "warden",
+        api: "rest",
+        protocol: "REST",
+      }).address,
+    ).toEqual(url);
+  });
+
+  it("fails closed when a network instance is missing", () => {
+    const {
+      networkInstance,
+    } = require("../routing");
+    const {
+      NetworkInstanceNotFoundError,
+    } = require("../errors");
+    expect(() =>
+      networkInstance({
+        module: "platform",
+        service: "warden",
+        api: "rest",
+        protocol: "REST",
+      }),
+    ).toThrow(NetworkInstanceNotFoundError);
+  });
+
+  it("requires a protocol when an API name is ambiguous", () => {
+    process.env.CODEFLY__ENDPOINT__PLATFORM__WARDEN__RPC__CONNECT =
+      "localhost:9090";
+    process.env.CODEFLY__ENDPOINT__PLATFORM__WARDEN__RPC__GRPC =
+      "dns:///warden.local:9090";
+    const {
+      networkInstance,
+    } = require("../routing");
+    const {
+      NetworkInstanceAmbiguousError,
+    } = require("../errors");
+    expect(() =>
+      networkInstance({
+        module: "platform",
+        service: "warden",
+        api: "rpc",
+      }),
+    ).toThrow(NetworkInstanceAmbiguousError);
+  });
+
   it("re-reads env on every call (no module-level cache)", () => {
     // First resolution sees nothing.
     const { getEndpointUrl } = require("../routing");
