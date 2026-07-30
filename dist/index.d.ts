@@ -1,6 +1,7 @@
 export type { Method, Protocol, Route, ServiceEndpoint, ModuleEndpoints, EndpointRequest, NetworkInstanceRequest, } from "./types";
 export { httpMethods } from "./types";
 export { getEndpoints, getEndpointsByProtocol, getEndpointsByModule, getCurrentModule, getCurrentService, getCurrentServiceVersion, getCurrentFixture, } from "./parsing";
+export { getWorkspaceConfiguration, getWorkspaceSecret, getWorkspaceValue, } from "./configuration";
 export { routing, endpoint, getEndpointUrl, fetchEndpoint, networkInstance, HttpError, } from "./routing";
 export type { FetchEndpointOptions } from "./routing";
 export { NetworkInstanceAmbiguousError, NetworkInstanceNotFoundError, RouteNotFoundError, } from "./errors";

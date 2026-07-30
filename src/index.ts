@@ -23,6 +23,14 @@ export {
   getCurrentFixture,
 } from "./parsing";
 
+// Workspace configuration. Callers never depend on Codefly's environment
+// transport encoding directly.
+export {
+  getWorkspaceConfiguration,
+  getWorkspaceSecret,
+  getWorkspaceValue,
+} from "./configuration";
+
 // URL resolution + typed fetch.
 export {
   routing,
