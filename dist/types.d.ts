@@ -1,8 +1,8 @@
 /** HTTP methods the routing table knows about. */
 export type Method = "GET" | "POST" | "PUT" | "PATCH" | "DELETE" | "OPTIONS";
-/** Endpoint protocol. REST is plain HTTP; CONNECT is Connect-ES;
- *  GRPC is raw gRPC. Discovered via their own env-var suffixes. */
-export type Protocol = "REST" | "CONNECT" | "GRPC";
+/** Endpoint protocol. HTTP is a generic web endpoint, REST is route-aware HTTP,
+ *  CONNECT is Connect-ES, and GRPC is raw gRPC. */
+export type Protocol = "HTTP" | "REST" | "CONNECT" | "GRPC";
 export declare const httpMethods: Method[];
 /** A single routable path on a REST endpoint. visibility is "public" or
  *  "private" — propagated from the agent so the frontend can surface
@@ -14,7 +14,7 @@ export interface Route {
 }
 /** A service endpoint as discovered from CODEFLY__ENDPOINT__… env vars.
  *  address is the base URL; routes are populated for REST endpoints via
- *  the CODEFLY__REST_ROUTE__… entries. For CONNECT/GRPC endpoints,
+ *  the CODEFLY__REST_ROUTE__… entries. For HTTP/CONNECT/GRPC endpoints,
  *  routes stays empty and consumers call `address` directly. */
 export interface ServiceEndpoint {
     module: string;

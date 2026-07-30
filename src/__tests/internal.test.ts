@@ -98,6 +98,34 @@ describe("codefly getEndpointUrl", () => {
     expect(grpcs[0].protocol).toEqual("GRPC");
   });
 
+  it("exposes the service's generic HTTP endpoint with canonical names", () => {
+    process.env.CODEFLY__ENDPOINT__MODULE_SAAS_STARTER__FRONTEND__HTTP__HTTP =
+      "localhost:42152";
+    const { getEndpointsByProtocol } = require("../parsing");
+    expect(getEndpointsByProtocol("HTTP")).toEqual([
+      expect.objectContaining({
+        module: "module-saas-starter",
+        service: "frontend",
+        name: "http",
+        protocol: "HTTP",
+        address: "http://localhost:42152",
+      }),
+    ]);
+  });
+
+  it("decodes normalized service names in dependency endpoints", () => {
+    process.env.CODEFLY__ENDPOINT__SAAS_STARTER__AUTH_SIDECAR__REST__REST =
+      "localhost:8080";
+    const { getEndpoints } = require("../parsing");
+    expect(getEndpoints()).toEqual([
+      expect.objectContaining({
+        module: "saas-starter",
+        service: "auth-sidecar",
+        name: "rest",
+      }),
+    ]);
+  });
+
   it("resolves a plugin-capable REST network instance without a route", () => {
     process.env.CODEFLY__ENDPOINT__PLATFORM__WARDEN__REST__REST = url;
     const { networkInstance } = require("../routing");
@@ -160,6 +188,67 @@ describe("codefly getEndpointUrl", () => {
     expect(getEndpointUrl("GET", "public", "api", "/health")).toEqual(
       `${url}/health`,
     );
+  });
+});
+
+describe("workspace configuration", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {};
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("reads public and secret values through the SDK boundary", () => {
+    process.env.CODEFLY__WORKSPACE_CONFIGURATION__SECURITY__PUBLIC_SETTING =
+      "public";
+    process.env.CODEFLY__WORKSPACE_SECRET_CONFIGURATION__SECURITY__SECRET_SETTING =
+      "secret";
+    const {
+      getWorkspaceConfiguration,
+      getWorkspaceSecret,
+    } = require("../configuration");
+    expect(getWorkspaceConfiguration("security", "public-setting")).toBe(
+      "public",
+    );
+    expect(getWorkspaceSecret("security", "secret-setting")).toBe("secret");
+  });
+
+  it("prefers exact names and accepts Codefly-normalized names", () => {
+    process.env.CODEFLY__WORKSPACE_CONFIGURATION__INTERNAL_AUTH__TOKEN =
+      "normalized";
+    process.env["CODEFLY__WORKSPACE_CONFIGURATION__INTERNAL-AUTH__TOKEN"] =
+      "exact";
+    process.env.CODEFLY__WORKSPACE_SECRET_CONFIGURATION__INTERNAL_AUTH__FALLBACK =
+      "normalized-secret";
+    const {
+      getWorkspaceConfiguration,
+      getWorkspaceSecret,
+    } = require("../configuration");
+    expect(getWorkspaceConfiguration("internal-auth", "token")).toBe("exact");
+    expect(getWorkspaceSecret("internal-auth", "fallback")).toBe(
+      "normalized-secret",
+    );
+  });
+
+  it("resolves public before secret and re-reads configuration each call", () => {
+    process.env.CODEFLY__WORKSPACE_SECRET_CONFIGURATION__IDENTITY__MODE =
+      "secret";
+    const { getWorkspaceValue } = require("../configuration");
+    expect(getWorkspaceValue("identity", "mode")).toBe("secret");
+    process.env.CODEFLY__WORKSPACE_CONFIGURATION__IDENTITY__MODE = "public";
+    expect(getWorkspaceValue("identity", "mode")).toBe("public");
+  });
+
+  it("returns undefined for absent or blank values", () => {
+    process.env.CODEFLY__WORKSPACE_CONFIGURATION__SECURITY__EMPTY = "  ";
+    const { getWorkspaceConfiguration } = require("../configuration");
+    expect(getWorkspaceConfiguration("security", "missing")).toBeUndefined();
+    expect(getWorkspaceConfiguration("security", "empty")).toBeUndefined();
   });
 });
 

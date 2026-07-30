@@ -1,17 +1,17 @@
 // Env-var parsing. codefly injects `CODEFLY__ENDPOINT__<MODULE>__
 // <SERVICE>__<NAME>__<PROTOCOL>=<url>` for every endpoint of every
-// service a consumer depends on. REST endpoints additionally get
+// service a consumer depends on (including the service's own public HTTP
+// endpoint). REST endpoints additionally get
 // `CODEFLY__REST_ROUTE__<MODULE>__<SERVICE>__<NAME>__REST___<PATH>___<METHOD>`
 // entries describing each route.
 //
 // The previous implementation ONLY parsed __REST suffixes, so Connect-ES
 // and gRPC endpoints (heavily used in saas-starter) were invisible to
-// the SDK. This module now recognizes all three protocols.
+// the SDK. This module now recognizes all four protocols.
 //
-// Also previously: the endpoint regex used greedy `(.+)` matchers
-// everywhere, which splits module/service names containing underscores
-// into the wrong groups. The fixed regex uses a character class that
-// excludes `_` from component bodies.
+// Also previously: the parser did not decode Core's underscore-normalized
+// component names, so `auth-sidecar` could not be selected by its canonical
+// service name.
 
 import {
   ModuleEndpoints,
@@ -24,14 +24,13 @@ import {
 // these names from `parsing` directly.
 export type { ModuleEndpoints, Route, ServiceEndpoint } from "./types";
 
-// Component pattern: uppercase letters, digits, dash. Underscores are
-// the component SEPARATOR so they can't appear inside a component —
-// the Go side enforces this by converting snake_case to dash-case
-// before writing the env var.
-const COMPONENT = "[A-Z0-9-]+";
+// Core encodes '-' as '_' inside components and uses '__' as the component
+// delimiter. The regexp backtracks over the greedy component to the double
+// separator; decodeComponent restores Codefly's canonical dash spelling.
+const COMPONENT = "[A-Z0-9_-]+";
 
 const ENDPOINT_RE = new RegExp(
-  `CODEFLY__ENDPOINT__(${COMPONENT})__(${COMPONENT})__(${COMPONENT})__(REST|CONNECT|GRPC)$`,
+  `CODEFLY__ENDPOINT__(${COMPONENT})__(${COMPONENT})__(${COMPONENT})__(HTTP|REST|CONNECT|GRPC)$`,
 );
 
 // REST-route env vars look like:
@@ -51,6 +50,10 @@ function endpointKey(
   return `${module}:${service}:${name}:${protocol}`;
 }
 
+function decodeComponent(value: string): string {
+  return value.toLowerCase().replace(/_/g, "-");
+}
+
 function envSource(): NodeJS.ProcessEnv {
   // Always read fresh — the previous cached `_endpoints` const (populated
   // at module load time) was invisible to any env var set AFTER import.
@@ -66,7 +69,10 @@ const BARE_HTTP_AUTHORITY = /^(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:]+\]):\d{1,5}$/;
  *  The SDK contract is a URL, so normalize the transport detail here once. */
 function endpointAddress(protocol: Protocol, value: string): string {
   const address = value.trim();
-  if ((protocol === "REST" || protocol === "CONNECT") && BARE_HTTP_AUTHORITY.test(address)) {
+  if (
+    (protocol === "HTTP" || protocol === "REST" || protocol === "CONNECT") &&
+    BARE_HTTP_AUTHORITY.test(address)
+  ) {
     return `http://${address}`;
   }
   return address;
@@ -82,9 +88,9 @@ function parseEndpoints(): Record<string, ServiceEndpoint> {
     const protocol = protoRaw as Protocol;
     const k = endpointKey(mod, svc, name, protocol);
     out[k] = {
-      module: mod.toLowerCase(),
-      service: svc.toLowerCase(),
-      name: name.toLowerCase(),
+      module: decodeComponent(mod),
+      service: decodeComponent(svc),
+      name: decodeComponent(name),
       protocol,
       address: endpointAddress(protocol, env[key] ?? ""),
       routes: [],
