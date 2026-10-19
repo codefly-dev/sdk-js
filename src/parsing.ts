@@ -78,12 +78,45 @@ function endpointAddress(protocol: Protocol, value: string): string {
   return address;
 }
 
+// A carrier this SDK was handed and could not read.
+//
+// Absence and incapacity are not the same answer, and returning `[]` for both
+// is what made the REST-only parser expensive rather than merely wrong: a
+// consumer pointed at a Connect endpoint saw "this composition resolved no
+// endpoints", which is a legitimate state, instead of "this SDK cannot read
+// __CONNECT". The same rule is stated in sdk-go's WorkspaceValueIfSet —
+// "Absence is an answer; a failed read is not."
+//
+// So anything carrying the endpoint prefix that the pattern does not match is
+// reported once, rather than skipped in silence. It is a warning and not a
+// throw: a consumer that genuinely does not need that endpoint must keep
+// working, and this module is read during startup.
+const ENDPOINT_PREFIX = "CODEFLY__ENDPOINT__";
+const unreadable = new Set<string>();
+
+function reportUnreadable(key: string): void {
+  if (unreadable.has(key)) return;
+  unreadable.add(key);
+  console.warn(
+    `codefly: ${key} is an endpoint carrier this SDK cannot read, so it is not among getEndpoints(). ` +
+      `Supported protocols are HTTP, REST, CONNECT and GRPC; a carrier naming another is invisible here rather than absent.`,
+  );
+}
+
+/** The carriers this SDK was given and could not read, for diagnostics. */
+export function unreadableEndpointCarriers(): string[] {
+  return [...unreadable];
+}
+
 function parseEndpoints(): Record<string, ServiceEndpoint> {
   const env = envSource();
   const out: Record<string, ServiceEndpoint> = {};
   for (const key of Object.keys(env)) {
     const m = key.match(ENDPOINT_RE);
-    if (!m) continue;
+    if (!m) {
+      if (key.startsWith(ENDPOINT_PREFIX)) reportUnreadable(key);
+      continue;
+    }
     const [, mod, svc, name, protoRaw] = m;
     const protocol = protoRaw as Protocol;
     const k = endpointKey(mod, svc, name, protocol);
