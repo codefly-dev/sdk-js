@@ -21,6 +21,7 @@ export {
   getCurrentService,
   getCurrentServiceVersion,
   getCurrentFixture,
+  unreadableEndpointCarriers,
 } from "./parsing";
 
 // Workspace configuration. Callers never depend on Codefly's environment
