@@ -21,6 +21,7 @@ export {
   getCurrentService,
   getCurrentServiceVersion,
   getCurrentFixture,
+  isLocal,
   unreadableEndpointCarriers,
 } from "./parsing";
 

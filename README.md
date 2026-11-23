@@ -13,6 +13,10 @@ const internalToken = getWorkspaceSecret(
 );
 ```
 
+Use `isLocal()` in server code to check whether Codefly selected its local
+environment. A missing environment or a browser-facing copy of the environment
+name yields `false`.
+
 ## Run tests
 
 ```shell

@@ -9,6 +9,7 @@ import {
   getCurrentServiceVersion,
   getCurrentFixture,
 } from "../parsing";
+import { isLocal } from "../index";
 
 const url = "http://localhost:8080";
 
@@ -328,4 +329,26 @@ describe("getCurrentFixture", () => {
     process.env = {};
     expect(getCurrentFixture()).toBe("");
   });
+});
+
+describe("isLocal", () => {
+  const originalEnv = process.env;
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it.each(["local", "LOCAL"])("accepts the server environment %s", (name) => {
+    process.env = { CODEFLY__ENVIRONMENT: name };
+    expect(isLocal()).toBe(true);
+  });
+
+  it.each([undefined, "", "staging", "production", "local-preview"])(
+    "refuses server environment %s even with a local browser value",
+    (name) => {
+      process.env = { NEXT_PUBLIC_CODEFLY__ENVIRONMENT: "local" };
+      if (name !== undefined) process.env.CODEFLY__ENVIRONMENT = name;
+      expect(isLocal()).toBe(false);
+    },
+  );
 });

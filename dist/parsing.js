@@ -14,6 +14,7 @@
 // component names, so `auth-sidecar` could not be selected by its canonical
 // service name.
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.unreadableEndpointCarriers = unreadableEndpointCarriers;
 exports.getEndpoints = getEndpoints;
 exports.getEndpointsByProtocol = getEndpointsByProtocol;
 exports.getEndpointsByModule = getEndpointsByModule;
@@ -21,6 +22,7 @@ exports.getCurrentModule = getCurrentModule;
 exports.getCurrentService = getCurrentService;
 exports.getCurrentServiceVersion = getCurrentServiceVersion;
 exports.getCurrentFixture = getCurrentFixture;
+exports.isLocal = isLocal;
 // Core encodes '-' as '_' inside components and uses '__' as the component
 // delimiter. The regexp backtracks over the greedy component to the double
 // separator; decodeComponent restores Codefly's canonical dash spelling.
@@ -56,13 +58,42 @@ function endpointAddress(protocol, value) {
     }
     return address;
 }
+// A carrier this SDK was handed and could not read.
+//
+// Absence and incapacity are not the same answer, and returning `[]` for both
+// is what made the REST-only parser expensive rather than merely wrong: a
+// consumer pointed at a Connect endpoint saw "this composition resolved no
+// endpoints", which is a legitimate state, instead of "this SDK cannot read
+// __CONNECT". The same rule is stated in sdk-go's WorkspaceValueIfSet —
+// "Absence is an answer; a failed read is not."
+//
+// So anything carrying the endpoint prefix that the pattern does not match is
+// reported once, rather than skipped in silence. It is a warning and not a
+// throw: a consumer that genuinely does not need that endpoint must keep
+// working, and this module is read during startup.
+const ENDPOINT_PREFIX = "CODEFLY__ENDPOINT__";
+const unreadable = new Set();
+function reportUnreadable(key) {
+    if (unreadable.has(key))
+        return;
+    unreadable.add(key);
+    console.warn(`codefly: ${key} is an endpoint carrier this SDK cannot read, so it is not among getEndpoints(). ` +
+        `Supported protocols are HTTP, REST, CONNECT and GRPC; a carrier naming another is invisible here rather than absent.`);
+}
+/** The carriers this SDK was given and could not read, for diagnostics. */
+function unreadableEndpointCarriers() {
+    return [...unreadable];
+}
 function parseEndpoints() {
     const env = envSource();
     const out = {};
     for (const key of Object.keys(env)) {
         const m = key.match(ENDPOINT_RE);
-        if (!m)
+        if (!m) {
+            if (key.startsWith(ENDPOINT_PREFIX))
+                reportUnreadable(key);
             continue;
+        }
         const [, mod, svc, name, protoRaw] = m;
         const protocol = protoRaw;
         const k = endpointKey(mod, svc, name, protocol);
@@ -138,5 +169,9 @@ function getCurrentServiceVersion() {
 /** Fixture selected by the Codefly runtime, or an empty string when none is active. */
 function getCurrentFixture() {
     return findBySuffix("CODEFLY__FIXTURE");
+}
+/** Whether Codefly launched this server in its local environment. */
+function isLocal() {
+    return envSource().CODEFLY__ENVIRONMENT?.toLowerCase() === "local";
 }
 //# sourceMappingURL=parsing.js.map

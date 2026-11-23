@@ -199,3 +199,8 @@ export function getCurrentServiceVersion(): string {
 export function getCurrentFixture(): string {
   return findBySuffix("CODEFLY__FIXTURE");
 }
+
+/** Whether Codefly launched this server in its local environment. */
+export function isLocal(): boolean {
+  return envSource().CODEFLY__ENVIRONMENT?.toLowerCase() === "local";
+}

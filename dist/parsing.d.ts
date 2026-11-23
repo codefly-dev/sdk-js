@@ -1,5 +1,7 @@
 import { ModuleEndpoints, Protocol, ServiceEndpoint } from "./types";
 export type { ModuleEndpoints, Route, ServiceEndpoint } from "./types";
+/** The carriers this SDK was given and could not read, for diagnostics. */
+export declare function unreadableEndpointCarriers(): string[];
 /** Returns every endpoint visible via env vars, across all protocols.
  *  Evaluated every call — do NOT cache at module level. */
 export declare function getEndpoints(): ServiceEndpoint[];
@@ -12,4 +14,6 @@ export declare function getCurrentService(): string;
 export declare function getCurrentServiceVersion(): string;
 /** Fixture selected by the Codefly runtime, or an empty string when none is active. */
 export declare function getCurrentFixture(): string;
+/** Whether Codefly launched this server in its local environment. */
+export declare function isLocal(): boolean;
 //# sourceMappingURL=parsing.d.ts.map
