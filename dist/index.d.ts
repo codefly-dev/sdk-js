@@ -4,7 +4,7 @@ export { getEndpoints, getEndpointsByProtocol, getEndpointsByModule, getCurrentM
 export { getWorkspaceConfiguration, getWorkspaceSecret, getWorkspaceValue, } from "./configuration";
 export { routing, endpoint, getEndpointUrl, fetchEndpoint, networkInstance, HttpError, } from "./routing";
 export type { FetchEndpointOptions } from "./routing";
-export { NetworkInstanceAmbiguousError, NetworkInstanceNotFoundError, RouteNotFoundError, } from "./errors";
+export { DependencyAddressUnresolvedError, NetworkInstanceAmbiguousError, NetworkInstanceNotFoundError, RouteNotFoundError, } from "./errors";
 export { withDependencies } from "./dependencies";
 export type { WithDependenciesOptions, Dependencies, } from "./dependencies";
 export { resolveServiceAddress, resolveServiceAddressSync, } from "./resolve";

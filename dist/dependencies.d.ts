@@ -32,7 +32,8 @@ export interface WithDependenciesOptions {
     /** Explicit base URL to poll. If omitted, the SDK resolves the
      *  `readyService`'s REST address from codefly (`codefly get endpoints`),
      *  so the probe targets the correct workspace-derived port instead of a
-     *  hardcoded guess. */
+     *  hardcoded guess. When codefly resolves no address the call rejects
+     *  with DependencyAddressUnresolvedError — there is no fallback address. */
     baseURL?: string;
     /** Service whose REST endpoint is polled for readiness when `baseURL`
      *  is omitted. Defaults to `service` — but with --exclude-root you

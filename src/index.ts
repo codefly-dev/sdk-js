@@ -46,6 +46,7 @@ export type { FetchEndpointOptions } from "./routing";
 
 // Errors.
 export {
+  DependencyAddressUnresolvedError,
   NetworkInstanceAmbiguousError,
   NetworkInstanceNotFoundError,
   RouteNotFoundError,

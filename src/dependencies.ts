@@ -27,6 +27,7 @@
 //     "well, maybe it worked" paths.
 
 import { ChildProcess, spawn } from "node:child_process";
+import { DependencyAddressUnresolvedError } from "./errors";
 import { resolveServiceAddress } from "./resolve";
 
 export interface WithDependenciesOptions {
@@ -71,7 +72,8 @@ export interface WithDependenciesOptions {
   /** Explicit base URL to poll. If omitted, the SDK resolves the
    *  `readyService`'s REST address from codefly (`codefly get endpoints`),
    *  so the probe targets the correct workspace-derived port instead of a
-   *  hardcoded guess. */
+   *  hardcoded guess. When codefly resolves no address the call rejects
+   *  with DependencyAddressUnresolvedError — there is no fallback address. */
   baseURL?: string;
 
   /** Service whose REST endpoint is polled for readiness when `baseURL`
@@ -143,13 +145,13 @@ export async function withDependencies(
   opts: WithDependenciesOptions,
 ): Promise<Dependencies> {
   const bin = opts.codeflyBinary ?? "codefly";
-  // Scope default is EMPTY — deterministic default ports (e.g. the
-  // frontend's 21931) line up with the caller's baseURL default.
+  // Scope default is EMPTY — the workspace's own deterministic ports.
   //
   // Scoping is opt-in for parallel test processes that need their own
   // pristine postgres/redis: set opts.scope explicitly OR export
   // CODEFLY_TEST_SCOPE in the shell. When you scope, the derived ports
-  // change — pass a matching baseURL too.
+  // change; the readiness address is resolved in the same scope, and an
+  // explicit baseURL has to match it.
   const scope = opts.scope ?? process.env.CODEFLY_TEST_SCOPE ?? "";
 
   const keepAlive =
@@ -218,12 +220,24 @@ export async function withDependencies(
   let baseURL = opts.baseURL;
   if (!baseURL) {
     const probe = opts.readyService ?? opts.service;
-    baseURL =
-      (await resolveServiceAddress(probe, "rest", {
-        scope,
-        cwd: opts.cwd,
-        codeflyBinary: bin,
-      })) ?? "http://localhost:21931";
+    const resolved = await resolveServiceAddress(probe, "rest", {
+      scope,
+      cwd: opts.cwd,
+      codeflyBinary: bin,
+    });
+    if (!resolved) {
+      // No address means there is nothing to probe. Guessing one would poll
+      // a port that belongs to another workspace (or to nothing) until the
+      // timeout, so stop the stack this call started and say what is missing.
+      try {
+        child.kill("SIGTERM");
+      } catch {
+        // Ignore; child may already be dead.
+      }
+      if (spawnError) throw spawnError;
+      throw new DependencyAddressUnresolvedError(probe, "rest", scope);
+    }
+    baseURL = resolved;
   }
   const readyURL = baseURL.replace(/\/$/, "") + (opts.readyPath ?? "/");
   const readyTimeoutMs = opts.readyTimeoutMs ?? 90_000;

@@ -29,6 +29,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.withDependencies = withDependencies;
 const node_child_process_1 = require("node:child_process");
+const errors_1 = require("./errors");
 const resolve_1 = require("./resolve");
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,13 +54,13 @@ async function waitUntilReady(url, deadline) {
 }
 async function withDependencies(opts) {
     const bin = opts.codeflyBinary ?? "codefly";
-    // Scope default is EMPTY — deterministic default ports (e.g. the
-    // frontend's 21931) line up with the caller's baseURL default.
+    // Scope default is EMPTY — the workspace's own deterministic ports.
     //
     // Scoping is opt-in for parallel test processes that need their own
     // pristine postgres/redis: set opts.scope explicitly OR export
     // CODEFLY_TEST_SCOPE in the shell. When you scope, the derived ports
-    // change — pass a matching baseURL too.
+    // change; the readiness address is resolved in the same scope, and an
+    // explicit baseURL has to match it.
     const scope = opts.scope ?? process.env.CODEFLY_TEST_SCOPE ?? "";
     const keepAlive = opts.keepAlive ??
         process.env.CODEFLY_TEST_KEEP_ALIVE === "1" ??
@@ -127,12 +128,26 @@ async function withDependencies(opts) {
     let baseURL = opts.baseURL;
     if (!baseURL) {
         const probe = opts.readyService ?? opts.service;
-        baseURL =
-            (await (0, resolve_1.resolveServiceAddress)(probe, "rest", {
-                scope,
-                cwd: opts.cwd,
-                codeflyBinary: bin,
-            })) ?? "http://localhost:21931";
+        const resolved = await (0, resolve_1.resolveServiceAddress)(probe, "rest", {
+            scope,
+            cwd: opts.cwd,
+            codeflyBinary: bin,
+        });
+        if (!resolved) {
+            // No address means there is nothing to probe. Guessing one would poll
+            // a port that belongs to another workspace (or to nothing) until the
+            // timeout, so stop the stack this call started and say what is missing.
+            try {
+                child.kill("SIGTERM");
+            }
+            catch {
+                // Ignore; child may already be dead.
+            }
+            if (spawnError)
+                throw spawnError;
+            throw new errors_1.DependencyAddressUnresolvedError(probe, "rest", scope);
+        }
+        baseURL = resolved;
     }
     const readyURL = baseURL.replace(/\/$/, "") + (opts.readyPath ?? "/");
     const readyTimeoutMs = opts.readyTimeoutMs ?? 90000;
