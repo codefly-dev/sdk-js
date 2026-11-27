@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+# Use exactly the Node majors selected by the CI compatibility matrix.
+versions=$(ruby -ryaml -e 'puts YAML.load_file(ARGV.fetch(0)).fetch("jobs").fetch("build").fetch("strategy").fetch("matrix").fetch("node-version")' .github/workflows/node.js.yaml)
+while IFS= read -r version; do
+  mise exec "node@${version%.x}" -- npm run verify
+done <<< "$versions"

@@ -19,6 +19,8 @@ name yields `false`.
 
 ## Run tests
 
+Run `./scripts/verify` with mise and Ruby installed to exercise every Node version in the CI matrix. Each entry installs from the lockfile, builds the SDK and runs Jest.
+
 ```shell
 npx jest
 ```

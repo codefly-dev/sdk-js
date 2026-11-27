@@ -21,6 +21,7 @@
   },
   "scripts": {
     "test": "jest",
+    "verify": "npm ci && npm run build && CI=true npm test -- --runInBand",
     "build-ts": "tsc",
     "build": "npm run build-ts",
     "prepare": "npm run build-ts",
